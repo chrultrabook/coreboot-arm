@@ -290,6 +290,23 @@ static void add_cbmem_pointers(struct lb_header *header)
 			printk(BIOS_ERR, "No more room in coreboot table!\n");
 			break;
 		}
+
+		/* align */
+		int align = 16;
+		int offset = ((uintptr_t)cbmem_ref % align);
+		int shift = (align - offset) % align;
+		if (shift) {
+			cbmem_ref->tag = LB_TAG_UNUSED;
+			while (shift < cbmem_ref->size)
+				shift += align;
+			cbmem_ref->size = shift;
+
+			cbmem_ref = (struct lb_cbmem_ref *)lb_new_record(header);
+			if (!cbmem_ref) {
+				printk(BIOS_ERR, "No more room in coreboot table!\n");
+				break;
+			}
+		}
 		cbmem_ref->tag = sid->table_tag;
 		cbmem_ref->size = sizeof(*cbmem_ref);
 		cbmem_ref->cbmem_addr = (unsigned long)cbmem_addr;
