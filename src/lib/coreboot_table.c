@@ -148,6 +148,24 @@ static void lb_framebuffer(struct lb_header *header)
 		return;
 
 	framebuffer = (struct lb_framebuffer *)lb_new_record(header);
+
+	/* align */
+	int align = 16;
+	int offset = ((uintptr_t)framebuffer % align);
+	int shift = (align - offset) % align;
+	if (shift) {
+		framebuffer->tag = LB_TAG_UNUSED;
+		while (shift < framebuffer->size)
+			shift += align;
+		framebuffer->size = shift;
+
+		framebuffer = (struct lb_framebuffer *)lb_new_record(header);
+		if (!framebuffer) {
+			printk(BIOS_ERR, "No more room in coreboot table!\n");
+			return;
+		}
+	}
+
 	memcpy(framebuffer, &fb, sizeof(*framebuffer));
 	framebuffer->tag = LB_TAG_FRAMEBUFFER;
 	framebuffer->size = sizeof(*framebuffer);
