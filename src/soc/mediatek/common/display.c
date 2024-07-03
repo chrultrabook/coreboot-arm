@@ -63,7 +63,7 @@ static void process_panel_quirks(struct mtk_dp *mtk_dp,
 		mtk_dp->force_max_swing = true;
 }
 
-int mtk_display_init(void)
+int mtk_display_init(uintptr_t fb_base, unsigned long fb_size)
 {
 	struct edid edid = {0};
 	struct mtk_dp mtk_edp = {0};
@@ -134,8 +134,6 @@ int mtk_display_init(void)
 
 	edid_set_framebuffer_bits_per_pixel(&edid, 32, 0);
 
-	mtk_ddp_mode_set(&edid, panel->disp_path);
-
 	if (panel->disp_path == DISP_PATH_EDP) {
 		if (mtk_edp_enable(&mtk_edp) < 0) {
 			printk(BIOS_ERR, "%s: Failed to enable eDP\n", __func__);
@@ -143,7 +141,8 @@ int mtk_display_init(void)
 		}
 	}
 
-	info = fb_new_framebuffer_info_from_edid(&edid, (uintptr_t)0);
+	mtk_ddp_mode_set(&edid, panel->disp_path, fb_base);
+	info = fb_new_framebuffer_info_from_edid(&edid, fb_base);
 	if (info)
 		fb_set_orientation(info, panel->orientation);
 

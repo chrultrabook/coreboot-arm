@@ -26,10 +26,10 @@ struct panel_description {
 	uint32_t quirks;
 };
 
-int mtk_display_init(void);
+int mtk_display_init(uintptr_t fb_base, unsigned long fb_size);
 struct panel_description *get_active_panel(void);
 
 void mtk_ddp_init(void);
-void mtk_ddp_mode_set(const struct edid *edid, enum disp_path_sel path);
+void mtk_ddp_mode_set(const struct edid *edid, enum disp_path_sel path, uintptr_t fb_base);
 
 #endif
