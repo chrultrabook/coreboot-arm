@@ -20,6 +20,7 @@
 #include <soc/regulator.h>
 #include <soc/spm.h>
 #include <soc/usb.h>
+#include <symbols.h>
 
 #include "gpio.h"
 
@@ -49,6 +50,9 @@
 #define GPIO_EN_PP3300_DISPLAY_DX	GPIO(CAM_CLK3)		/* 136 */
 #define GPIO_AP_EDP_BKLTEN		GPIO(KPROW1)		/* 152 */
 #define GPIO_BL_PWM_1V8			GPIO(DISP_PWM)		/* 40 */
+
+#define FB_BASE (uintptr_t)_framebuffer
+#define FB_SIZE REGION_SIZE(framebuffer)
 
 /* Override hs_da_trail for ANX7625 */
 void mtk_dsi_override_phy_timing(struct mtk_phy_timing *timing)
@@ -123,8 +127,8 @@ static bool configure_display(void)
 		return false;
 	}
 
-	mtk_ddp_mode_set(&edid);
-	fb_new_framebuffer_info_from_edid(&edid, (uintptr_t)0);
+	mtk_ddp_mode_set(&edid, FB_BASE);
+	fb_new_framebuffer_info_from_edid(&edid, FB_BASE);
 	return true;
 }
 
@@ -156,8 +160,12 @@ static void mainboard_init(struct device *dev)
 	if (spm_init())
 		printk(BIOS_ERR, "spm init fail, system suspend may stuck\n");
 
-	if (display_init_required())
+	if (display_init_required()) {
+		memset(_framebuffer, 0x00, REGION_SIZE(framebuffer));
 		configure_display();
+		gpio_output(GPIO_AP_EDP_BKLTEN, 1);
+		gpio_output(GPIO_BL_PWM_1V8, 1);
+	}
 	else
 		printk(BIOS_INFO, "%s: Skipped display init\n", __func__);
 }

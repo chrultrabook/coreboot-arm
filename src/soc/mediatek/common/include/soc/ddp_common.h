@@ -137,6 +137,6 @@ void ovl_set_roi(u32 idx, u32 width, u32 height, u32 color);
 void rdma_start(void);
 void rdma_config(u32 width, u32 height, u32 pixel_clk, u32 fifo_size);
 void color_start(u32 width, u32 height);
-void ovl_layer_config(u32 fmt, u32 bpp, u32 width, u32 height);
+void ovl_layer_config(u32 fmt, u32 bpp, u32 width, u32 height, uintptr_t fb_base);
 
 #endif

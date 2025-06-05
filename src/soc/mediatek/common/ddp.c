@@ -52,7 +52,7 @@ void color_start(u32 width, u32 height)
 	write32(&disp_color0->start, BIT(0));
 }
 
-void ovl_layer_config(u32 fmt, u32 bpp, u32 width, u32 height)
+void ovl_layer_config(u32 fmt, u32 bpp, u32 width, u32 height, uintptr_t fb_base)
 {
 	struct disp_ovl_regs *const ovl0 = disp_ovl[0];
 	write32(&ovl0->layer[0].con, fmt << 12);
@@ -64,4 +64,7 @@ void ovl_layer_config(u32 fmt, u32 bpp, u32 width, u32 height)
 	write32(&ovl0->rdma[0].mem_gmc_setting, RDMA_MEM_GMC);
 
 	setbits32(&ovl0->src_con, BIT(0));
+
+	write32(&ovl0->l0_addr, fb_base);
+	write32(&ovl0->en, 1);
 }

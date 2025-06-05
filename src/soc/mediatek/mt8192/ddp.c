@@ -174,7 +174,7 @@ void mtk_ddp_init(void)
 	write32((void *)(SMI_LARB0 + SMI_LARB_PORT_L0_OVL_RDMA0), 0);
 }
 
-void mtk_ddp_mode_set(const struct edid *edid)
+void mtk_ddp_mode_set(const struct edid *edid, uintptr_t fb_base)
 {
 	u32 fmt = OVL_INFMT_RGBA8888;
 	u32 bpp = edid->framebuffer_bits_per_pixel / 8;
@@ -193,6 +193,7 @@ void mtk_ddp_mode_set(const struct edid *edid)
 
 	main_disp_path_setup(width, height, vrefresh);
 	rdma_start();
-	ovl_layer_config(fmt, bpp, width, height);
+	ovl_layer_config(fmt, bpp, width, height, fb_base);
 	ovl_bgclr_in_sel(1);
+	write32((void *)0x1400600c, 1); // Enable 2 lane mode
 }
