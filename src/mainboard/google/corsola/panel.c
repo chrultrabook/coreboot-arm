@@ -30,9 +30,16 @@ bool is_pmic_aw37503(unsigned int bus)
 
 void backlight_control(void)
 {
-	/* Set up backlight control pins as output pin and power-off by default */
-	gpio_output(GPIO_AP_EDP_BKLTEN, 0);
-	gpio_output(GPIO_BL_PWM_1V8, 0);
+	/* Enable backlight before payload handoff if we're not building for CrOS */
+	if (!CONFIG(CHROMEOS)) {
+		gpio_output(GPIO_AP_EDP_BKLTEN, 1);
+		gpio_output(GPIO_BL_PWM_1V8, 1);
+	}
+	/* Leave it disabled for depthcharge */
+	else { 
+		gpio_output(GPIO_AP_EDP_BKLTEN, 0);
+		gpio_output(GPIO_BL_PWM_1V8, 0);
+	}
 }
 
 struct panel_description *get_active_panel(void)
