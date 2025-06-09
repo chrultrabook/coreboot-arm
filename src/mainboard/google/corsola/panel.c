@@ -36,7 +36,7 @@ void backlight_control(void)
 		gpio_output(GPIO_BL_PWM_1V8, 1);
 	}
 	/* Leave it disabled for depthcharge */
-	else { 
+	else {
 		gpio_output(GPIO_AP_EDP_BKLTEN, 0);
 		gpio_output(GPIO_BL_PWM_1V8, 0);
 	}

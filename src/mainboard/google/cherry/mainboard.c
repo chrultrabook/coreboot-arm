@@ -17,6 +17,7 @@
 #include <soc/spm.h>
 #include <soc/usb.h>
 #include <types.h>
+#include <symbols.h>
 
 #include "gpio.h"
 
@@ -53,11 +54,18 @@ bool mainboard_needs_pcie_init(void)
 	return false;
 }
 
-/* Set up backlight control pins as output pin and power-off by default */
 static void configure_backlight(void)
 {
-	gpio_output(GPIO_AP_EDP_BKLTEN, 0);
-	gpio_output(GPIO_BL_PWM_1V8, 0);
+	/* Enable backlight before payload handoff if we're not building for CrOS */
+	if (!CONFIG(CHROMEOS)) {
+		gpio_output(GPIO_AP_EDP_BKLTEN, 1);
+		gpio_output(GPIO_BL_PWM_1V8, 1);
+	}
+	/* Leave it disabled for depthcharge */
+	else {
+		gpio_output(GPIO_AP_EDP_BKLTEN, 0);
+		gpio_output(GPIO_BL_PWM_1V8, 0);
+	}
 }
 
 static void power_on_panel(void)
@@ -103,8 +111,11 @@ static void configure_audio(void)
 
 static void mainboard_init(struct device *dev)
 {
-	if (display_init_required())
-		mtk_display_init();
+	if (display_init_required()) {
+		memset(_framebuffer, 0x00, REGION_SIZE(framebuffer));
+		if (mtk_display_init((uintptr_t)_framebuffer, REGION_SIZE(framebuffer)) < 0)
+			printk(BIOS_ERR, "%s: Failed to init display\n", __func__);
+	}
 	else
 		printk(BIOS_INFO, "%s: Skipped display initialization\n", __func__);
 
