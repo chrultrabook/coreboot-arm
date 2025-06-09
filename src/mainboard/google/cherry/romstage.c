@@ -34,7 +34,7 @@ void platform_romstage_main(void)
 		mt6360_init(I2C7);
 	clk_buf_init();
 	rtc_boot();
-	if (CONFIG(PCI))
+	if (CONFIG(BOARD_GOOGLE_DOJO))
 		mtk_pcie_deassert_perst();
 	mtk_dram_init();
 	scp_rsi_enable();
