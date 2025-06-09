@@ -85,6 +85,20 @@ static const struct {
 	},
 };
 
+int google_chromeec_backlight(bool enable)
+{
+	const struct ec_params_pwm_set_duty params = {
+		.duty = (enable) ? EC_PWM_MAX_DUTY : 0,
+		.pwm_type = EC_PWM_TYPE_DISPLAY_LIGHT,
+		.index = 0,
+	};
+
+	if (ec_cmd_pwm_set_duty(PLAT_EC, &params) != 0)
+		return -1;
+
+	return 0;
+}
+
 uint8_t google_chromeec_calc_checksum(const uint8_t *data, int size)
 {
 	int csum;

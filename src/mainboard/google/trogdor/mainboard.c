@@ -7,6 +7,7 @@
 #include <device/device.h>
 #include <device/i2c_simple.h>
 #include <device/mmio.h>
+#include <ec/google/chromeec/ec.h>
 #include <mipi/panel.h>
 #include <drivers/ti/sn65dsi86bridge/sn65dsi86bridge.h>
 #include <drivers/parade/ps8640/ps8640.h>
@@ -22,6 +23,10 @@
 #include <soc/usb/qusb_phy.h>
 #include "board.h"
 #include <soc/addressmap.h>
+#include <symbols.h>
+
+#define FB_BASE (uintptr_t)_framebuffer
+#define FB_SIZE REGION_SIZE(framebuffer)
 
 #define BRIDGE_BUS QUPV3_0_SE2
 #define BRIDGE_SN65DSI86_CHIP	0x2d
@@ -228,7 +233,7 @@ static enum cb_err display_init(struct panel_serializable_data *panel)
 			sn65dsi86_backlight_enable(BRIDGE_BUS, BRIDGE_SN65DSI86_CHIP);
 	}
 
-	mdp_dsi_video_config(&panel->edid);
+	mdp_dsi_video_config(&panel->edid, FB_BASE);
 	mdss_dsi_video_mode_config(&panel->edid, dsi_bpp);
 	mdp_dsi_video_on();
 
@@ -248,6 +253,9 @@ static void display_startup(void)
 		printk(BIOS_INFO, "Skipping display init.\n");
 		return;
 	}
+
+	// Clear display region
+	memset(_framebuffer, 0x00, FB_SIZE);
 
 	if (CONFIG(TROGDOR_HAS_MIPI_PANEL)) {
 		configure_mipi_panel();
@@ -272,9 +280,13 @@ static void display_startup(void)
 	printk(BIOS_INFO, "display init!\n");
 	edid_set_framebuffer_bits_per_pixel(&panel->edid, 32, 0);
 	if (display_init(panel) == CB_SUCCESS) {
-		struct fb_info *fb = fb_new_framebuffer_info_from_edid(&panel->edid, 0);
+		struct fb_info *fb = fb_new_framebuffer_info_from_edid(&panel->edid, FB_BASE);
 		fb_set_orientation(fb, orientation);
 	}
+
+	// Configure backlight
+	google_chromeec_backlight(1);
+	gpio_output(GPIO_BACKLIGHT_ENABLE, 1);
 }
 
 static void configure_sdhci(void)

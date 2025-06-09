@@ -133,7 +133,7 @@ static void mdss_vbif_qos_remapper_setup(void)
 	write32(&vbif_rt->qos_lvl_remap[5].vbif_xinl_qos_lvl_remap, 0x77777776);
 }
 
-void mdp_dsi_video_config(struct edid *edid)
+void mdp_dsi_video_config(struct edid *edid, uint32_t fb_base)
 {
 	mdss_intf_tg_setup(edid);
 	mdss_intf_fetch_start_config(edid);
@@ -143,6 +143,7 @@ void mdp_dsi_video_config(struct edid *edid)
 	mdss_layer_mixer_setup(edid);
 	mdss_ctrl_config();
 	write32(&mdp_intf->intf_mux, 0x0F0000);
+	write32(&mdp_sspp->sspp_src0, fb_base);
 }
 
 void mdp_dsi_video_on(void)
@@ -152,4 +153,5 @@ void mdp_dsi_video_on(void)
 	ctl0_reg_val = VIG_0 | LAYER_MIXER_0 | CTL | INTF;
 	write32(&mdp_ctl->ctl_intf_flush, INTF_FLUSH);
 	write32(&mdp_ctl->ctl_flush, ctl0_reg_val);
+	write32(&mdp_intf->timing_eng_enable, 0x1);
 }

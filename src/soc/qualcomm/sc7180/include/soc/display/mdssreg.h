@@ -521,7 +521,7 @@ static struct mdp_layer_mixer_regs *const mdp_layer_mixer = (void *)MDP_VP_0_LAY
 static struct mdp_sspp_regs *const mdp_sspp = (void *)MDP_VP_0_SSPP_BASE;
 static struct vbif_rt_regs *const vbif_rt = (void *)MDP_VBIF_RT_BASE;
 
-void mdp_dsi_video_config(struct edid *edid);
+void mdp_dsi_video_config(struct edid *edid, uint32_t fb_base);
 void mdss_intf_tg_setup(struct edid *edid);
 void mdp_dsi_video_on(void);
 void mdss_ctrl_config(void);
