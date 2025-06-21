@@ -20,9 +20,13 @@
 #include <soc/spm.h>
 #include <soc/usb.h>
 #include <stdio.h>
+#include <symbols.h>
 
 #include "gpio.h"
 #include "panel.h"
+
+#define FB_BASE (uintptr_t)_framebuffer
+#define FB_SIZE REGION_SIZE(framebuffer)
 
 static void configure_emmc(void)
 {
@@ -70,11 +74,11 @@ struct panel_description __weak *get_panel_description(int panel_id)
 	return NULL;
 }
 
-/* Set up backlight control pins as output pin and power-off by default */
+/* Set up backlight control pins as output pin and power-on by default */
 static void configure_panel_backlight(void)
 {
-	gpio_output(GPIO(PERIPHERAL_EN13), 0);
-	gpio_output(GPIO(DISP_PWM), 0);
+	gpio_output(GPIO(DISP_PWM), 1);
+	gpio_output(GPIO(PERIPHERAL_EN13), 1);
 }
 
 static void power_on_panel(struct panel_description *panel)
@@ -171,8 +175,8 @@ static bool configure_display(void)
 	if (panel->post_power_on)
 		panel->post_power_on();
 
-	mtk_ddp_mode_set(edid);
-	struct fb_info *info = fb_new_framebuffer_info_from_edid(edid, 0);
+	mtk_ddp_mode_set(edid, FB_BASE);
+	struct fb_info *info = fb_new_framebuffer_info_from_edid(edid, FB_BASE);
 	if (info)
 		fb_set_orientation(info, panel->orientation);
 
@@ -183,6 +187,7 @@ static void mainboard_init(struct device *dev)
 {
 	if (display_init_required()) {
 		printk(BIOS_INFO, "%s: Starting display init.\n", __func__);
+		memset(_framebuffer, 0x00, FB_SIZE);
 		if (!configure_display())
 			printk(BIOS_ERR, "%s: Failed to init display.\n",
 			       __func__);

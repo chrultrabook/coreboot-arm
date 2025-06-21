@@ -178,6 +178,6 @@ enum {
 };
 
 void mtk_ddp_init(void);
-void mtk_ddp_mode_set(const struct edid *edid);
+void mtk_ddp_mode_set(const struct edid *edid, uintptr_t fb_base);
 
 #endif
