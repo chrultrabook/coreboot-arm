@@ -25,7 +25,7 @@ fw_config
 		option STORAGE_UNKNOWN		0
 		option STORAGE_NVME_GEN4	1
 		option STORAGE_NVME_GEN5	2
-		option STORAGE_UFS		3
+		option STORAGE_UFS		3 # Not supported
 	end
 	field KB 10 11
 		option KB_UNKNOWN		0
@@ -43,17 +43,17 @@ end
 
 chip soc/intel/pantherlake
 
-	register "power_limits_config[PTL_U_1_CORE]" = "{
+	register "power_limits_config[PTL_CORE_1]" = "{
 		.tdp_pl1_override = 15,
 		.tdp_pl2_override = 25,
 	}"
 
-	register "power_limits_config[PTL_H_1_CORE]" = "{
+	register "power_limits_config[PTL_CORE_3]" = "{
 		.tdp_pl1_override = 25,
 		.tdp_pl2_override = 25,
 	}"
 
-	register "power_limits_config[PTL_H_2_CORE]" = "{
+	register "power_limits_config[PTL_CORE_4]" = "{
 		.tdp_pl1_override = 25,
 		.tdp_pl2_override = 25,
 	}"
@@ -102,7 +102,8 @@ chip soc/intel/pantherlake
 	#| I2C4              | CLICK PAD                 |
 	#+-------------------+---------------------------+
 	register "common_soc_config" = "{
-		.logo_valignment = FW_SPLASH_VALIGNMENT_MIDDLE,
+		/* Render OEM footer logo 100px above from the edge */
+		.logo_bottom_margin = 100,
 		.i2c[1] = {
 			.early_init=1,
 			.speed = I2C_SPEED_FAST,
@@ -354,6 +355,25 @@ device ref tbt_pcie_rp0 on end
 				register "generic.detect" = "1"
 				register "hid_desc_reg_offset" = "0x20"
 				device i2c 0x38 on end
+			end
+			chip drivers/i2c/hid
+				register "generic.hid" = ""SYNA0000""
+				register "generic.cid" = ""ACPI0C50""
+				register "generic.desc" = ""Synaptics Touchpad""
+				register "generic.irq" = "ACPI_IRQ_WAKE_LEVEL_LOW(GPP_E18_IRQ)"
+				register "generic.wake" = "GPE0_DW2_18"
+				register "generic.detect" = "1"
+				register "hid_desc_reg_offset" = "0x20"
+				device i2c 0x2c on end
+			end
+			chip drivers/i2c/hid
+				register "generic.hid" = ""PNP0C50""
+				register "generic.desc" = ""PIXART Touchpad""
+				register "generic.irq" = "ACPI_IRQ_WAKE_LEVEL_LOW(GPP_E18_IRQ)"
+				register "generic.wake" = "GPE0_DW2_18"
+				register "generic.detect" = "1"
+				register "hid_desc_reg_offset" = "0x20"
+				device i2c 0x68 on end
 			end
 		end # I2C4
 

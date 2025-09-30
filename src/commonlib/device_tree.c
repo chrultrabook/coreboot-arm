@@ -259,6 +259,26 @@ static u32 fdt_read_cell_props(const void *blob, u32 node_offset, u32 *addrcp, u
 	return offset;
 }
 
+uint64_t fdt_read_int_prop(struct fdt_property *prop, u32 cells)
+{
+	if (cells == 0)
+		cells = prop->size / 4;
+
+	if (cells * 4 != prop->size) {
+		printk(BIOS_ERR, "FDT integer property of size %u @%p doesn't match expected cell count %u\n",
+		       prop->size, prop->data, cells);
+		return 0;
+	}
+
+	if (cells == 2)
+		return be64dec(prop->data);
+	else if (cells == 1)
+		return be32dec(prop->data);
+
+	printk(BIOS_ERR, "Illegal FDT integer property size %u @%p\n", prop->size, prop);
+	return 0;
+}
+
 /*
  * fdt_find_node searches for a node relative to another node
  *
@@ -746,12 +766,12 @@ bool fdt_is_valid(const void *blob)
 
 struct device_tree *fdt_unflatten(const void *blob)
 {
-	struct device_tree *tree = xzalloc(sizeof(*tree));
-	const struct fdt_header *header = (const struct fdt_header *)blob;
-	tree->header = header;
-
 	if (!fdt_is_valid(blob))
 		return NULL;
+
+	const struct fdt_header *header = blob;
+	struct device_tree *tree = xzalloc(sizeof(*tree));
+	tree->header = header;
 
 	uint32_t struct_offset = be32toh(header->structure_offset);
 	uint32_t strings_offset = be32toh(header->strings_offset);
@@ -1513,21 +1533,12 @@ void dt_add_u64_prop(struct device_tree_node *node, const char *name, u64 val)
 	dt_add_bin_prop(node, name, val_ptr, sizeof(*val_ptr));
 }
 
-/*
- * Add a 'reg' address list property to a node, or update it if it exists.
- *
- * @param node		The device tree node to add to.
- * @param regions       Array of address values to be stored in the property.
- * @param sizes		Array of corresponding size values to 'addrs'.
- * @param count		Number of values in 'addrs' and 'sizes' (must be equal).
- * @param addr_cells	Value of #address-cells property valid for this node.
- * @param size_cells	Value of #size-cells property valid for this node.
- */
-void dt_add_reg_prop(struct device_tree_node *node, u64 *addrs, u64 *sizes,
-		     int count, u32 addr_cells, u32 size_cells)
+static void dt_add_addr_and_size_prop(struct device_tree_node *node, const char *prop_name,
+				      const u64 *addrs, const u64 *sizes, int count,
+				      u32 addr_cells, u32 size_cells)
 {
 	int i;
-	size_t length = (addr_cells + size_cells) * sizeof(u32) * count;
+	size_t length = (size_t)(addr_cells + size_cells) * sizeof(u32) * count;
 	u8 *data = xmalloc(length);
 	u8 *cur = data;
 
@@ -1538,7 +1549,40 @@ void dt_add_reg_prop(struct device_tree_node *node, u64 *addrs, u64 *sizes,
 		cur += size_cells * sizeof(u32);
 	}
 
-	dt_add_bin_prop(node, "reg", data, length);
+	dt_add_bin_prop(node, prop_name, data, length);
+}
+
+/*
+ * Add a 'reg' address list property to a node, or update it if it exists.
+ *
+ * @param node		The device tree node to add to.
+ * @param regions       Array of address values to be stored in the property.
+ * @param sizes		Array of corresponding size values to 'addrs'.
+ * @param count		Number of values in 'addrs' and 'sizes' (must be equal).
+ * @param addr_cells	Value of #address-cells property valid for this node.
+ * @param size_cells	Value of #size-cells property valid for this node.
+ */
+void dt_add_reg_prop(struct device_tree_node *node, const u64 *addrs, const u64 *sizes,
+		     int count, u32 addr_cells, u32 size_cells)
+{
+	dt_add_addr_and_size_prop(node, "reg", addrs, sizes, count, addr_cells, size_cells);
+}
+
+/*
+ * Add a 'iommu-addresses' address list property to a node, or update it if it exists.
+ *
+ * @param node		The device tree node to add to.
+ * @param regions       Array of address values to be stored in the property.
+ * @param sizes		Array of corresponding size values to 'addrs'.
+ * @param count		Number of values in 'addrs' and 'sizes' (must be equal).
+ * @param addr_cells	Value of #address-cells property valid for this node.
+ * @param size_cells	Value of #size-cells property valid for this node.
+ */
+void dt_add_iommu_addr_prop(struct device_tree_node *node, const u64 *addrs, const u64 *sizes,
+			    int count, u32 addr_cells, u32 size_cells)
+{
+	dt_add_addr_and_size_prop(node, "iommu-addresses", addrs, sizes, count, addr_cells,
+				  size_cells);
 }
 
 /*

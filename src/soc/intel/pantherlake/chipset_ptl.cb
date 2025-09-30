@@ -2,19 +2,44 @@ chip soc/intel/pantherlake
 
 	device cpu_cluster 0 on end
 
-	register "power_limits_config[PTL_U_1_CORE]" = "{
+	register "power_limits_config[PTL_CORE_1]" = "{
 		.tdp_pl1_override = 15,
 		.tdp_pl2_override = 55,
-		.tdp_pl4 = 152,
+		.tdp_pl4 = 163,
+		.tdp_pl4_fastvmode = 150,
+	}"
+	register "thermal_design_current[PTL_SKU_1]" = "{
+		[VR_DOMAIN_IA] = 34 * 8,
+		[VR_DOMAIN_GT] = 23 * 8
 	}"
 
-	register "power_limits_config[PTL_H_1_CORE]" = "{
+	register "power_limits_config[PTL_CORE_2]" = "{
+		.tdp_pl1_override = 15,
+		.tdp_pl2_override = 45,
+		.tdp_pl4 = 105,
+		.tdp_pl4_fastvmode = 95,
+	}"
+	register "thermal_design_current[PTL_SKU_5]" = "{
+		[VR_DOMAIN_IA] = 23 * 8,
+		[VR_DOMAIN_GT] = 23 * 8
+	}"
+
+	register "power_limits_config[PTL_CORE_3]" = "{
 		.tdp_pl1_override = 25,
-		.tdp_pl2_override = 95,
-		.tdp_pl4 = 239,
+		.tdp_pl2_override = 64,
+		.tdp_pl4 = 175,
+		.tdp_pl4_fastvmode = 160,
+	}"
+	register "thermal_design_current[PTL_SKU_2]" = "{
+		[VR_DOMAIN_IA] = 39 * 8,
+		[VR_DOMAIN_GT] = 44 * 8
+	}"
+	register "thermal_design_current[PTL_SKU_3]" = "{
+		[VR_DOMAIN_IA] = 39 * 8,
+		[VR_DOMAIN_GT] = 23 * 8
 	}"
 
-	register "power_limits_config[PTL_H_2_CORE]" = "{
+	register "power_limits_config[PTL_CORE_4]" = "{
 		.tdp_pl1_override = 25,
 		.tdp_pl2_override = 64,
 		.tdp_pl4 = 154,
@@ -144,7 +169,6 @@ chip soc/intel/pantherlake
 		device pci 16.1 alias heci2 off end
 		device pci 16.4 alias heci3 off end
 		device pci 16.5 alias heci4 off end
-		device pci 17.0 alias ufs off end
 		device pci 18.0 alias eheci1 off end
 		device pci 18.1 alias eheci2 off end
 		device pci 18.2 alias eheci3 off end

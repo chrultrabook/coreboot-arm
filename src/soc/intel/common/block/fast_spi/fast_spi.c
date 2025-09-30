@@ -558,6 +558,7 @@ static struct device_operations fast_spi_dev_ops = {
 	.acpi_fill_ssdt			= fast_spi_fill_ssdt,
 	.acpi_name			= fast_spi_acpi_name,
 	.ops_pci			= &pci_dev_ops_pci,
+	.scan_bus			= scan_static_bus,
 };
 
 static const unsigned short pci_device_ids[] = {
@@ -578,6 +579,8 @@ static const unsigned short pci_device_ids[] = {
 	PCI_DID_INTEL_MCC_SPI0,
 	PCI_DID_INTEL_MTL_HWSEQ_SPI,
 	PCI_DID_INTEL_ARL_HWSEQ_SPI,
+	PCI_DID_INTEL_ARL_S_HWSEQ_SPI,
+	PCI_DID_INTEL_ARP_S_HWSEQ_SPI,
 	PCI_DID_INTEL_RPP_S_HWSEQ_SPI,
 	PCI_DID_INTEL_SPR_HWSEQ_SPI,
 	PCI_DID_INTEL_TGP_SPI0,

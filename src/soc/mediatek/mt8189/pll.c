@@ -66,7 +66,9 @@ enum mux_id {
 	CLK_TOP_AUDIO_H_SEL,
 	CLK_TOP_MCUPM_SEL,
 	CLK_TOP_MEM_SUB_SEL,
+	CLK_TOP_MEM_SUB_PERI_SEL,
 	CLK_TOP_MEM_SUB_U_SEL,
+	CLK_TOP_EMI_N_SEL,
 	CLK_TOP_DXCC_SEL,
 	CLK_TOP_DP_SEL,
 	CLK_TOP_EDP_SEL,
@@ -192,7 +194,9 @@ static const struct mux muxes[] = {
 	CKSYS_MUX_UPD(CLK_TOP_AUDIO_H_SEL, clk_cfg[12], 8, 2, clk_cfg_update[1], 18),
 	CKSYS_MUX_UPD(CLK_TOP_MCUPM_SEL, clk_cfg[12], 16, 2, clk_cfg_update[1], 19),
 	CKSYS_MUX_UPD(CLK_TOP_MEM_SUB_SEL, clk_cfg[12], 24, 4, clk_cfg_update[1], 20),
+	CKSYS_MUX_UPD(CLK_TOP_MEM_SUB_PERI_SEL, clk_cfg[13], 0, 3, clk_cfg_update[1], 21),
 	CKSYS_MUX_UPD(CLK_TOP_MEM_SUB_U_SEL, clk_cfg[13], 8, 3, clk_cfg_update[1], 22),
+	CKSYS_MUX_UPD(CLK_TOP_EMI_N_SEL, clk_cfg[13], 16, 3, clk_cfg_update[1], 23),
 	CKSYS_MUX_UPD(CLK_TOP_DXCC_SEL, clk_cfg[15], 24, 2, clk_cfg_update[2], 1),
 	CKSYS_MUX_UPD(CLK_TOP_DP_SEL, clk_cfg[16], 16, 3, clk_cfg_update[2], 4),
 	CKSYS_MUX_UPD(CLK_TOP_EDP_SEL, clk_cfg[16], 24, 3, clk_cfg_update[2], 5),
@@ -250,12 +254,14 @@ static const struct mux_sel mux_sels[] = {
 	{ .id = CLK_TOP_AUDIO_H_SEL, .sel = 3 },
 	{ .id = CLK_TOP_MCUPM_SEL, .sel = 2 },
 	{ .id = CLK_TOP_MEM_SUB_SEL, .sel = 9 },
+	{ .id = CLK_TOP_MEM_SUB_PERI_SEL, .sel = 7 },
 	{ .id = CLK_TOP_MEM_SUB_U_SEL, .sel = 7 },
+	{ .id = CLK_TOP_EMI_N_SEL, .sel = 2 },
 	{ .id = CLK_TOP_DXCC_SEL, .sel = 1 },
 	{ .id = CLK_TOP_DP_SEL, .sel = 4 },
 	{ .id = CLK_TOP_EDP_SEL, .sel = 4 },
 	{ .id = CLK_TOP_EDP_FAVT_SEL, .sel = 4 },
-	{ .id = CLK_TOP_SFLASH_SEL, .sel = 0 },
+	{ .id = CLK_TOP_SFLASH_SEL, .sel = 2 },
 	{ .id = CLK_TOP_ECC_SEL, .sel = 5 },
 };
 
@@ -281,7 +287,7 @@ static const struct mux vlp_muxes[] = {
 };
 
 static const struct vlp_mux_sel vlp_mux_sels[] = {
-	{ .id = CLK_VLP_CK_SCP_SEL, .sel = 0 },
+	{ .id = CLK_VLP_CK_SCP_SEL, .sel = 4 },
 	{ .id = CLK_VLP_CK_PWRAP_ULPOSC_SEL, .sel = 0 },
 	{ .id = CLK_VLP_CK_SPMI_P_MST_SEL, .sel = 0 },
 	{ .id = CLK_VLP_CK_DVFSRC_SEL, .sel = 0 },
@@ -553,6 +559,7 @@ void mt_pll_init(void)
 	write32(&mtk_apmixed->apll1_tuner_con0, 0x6F28BD4D);
 	write32(&mtk_apmixed->apll2_tuner_con0, 0x78FD5266);
 	setbits32(&mtk_apmixed->emipll_con[0], BIT(8));
+	setbits32(&mtk_apmixed->mfgpll_con[0], BIT(8));
 
 	/* PLL all enable */
 	write32(&mtk_apmixed->pllen_all_set, 0x0007FFFC);
@@ -616,7 +623,7 @@ void mt_pll_post_init(void)
 
 	/* TOPCKGEN CG Clear */
 	write32(&mtk_topckgen->clk_misc_cfg_3.clr, 0x00010000);
-	write32(&mtk_topckgen->clk_misc_cfg_3.set, 0xDF3CFCFF);
+	write32(&mtk_topckgen->clk_misc_cfg_3.set, 0xDF3DFCFF);
 	/* INFRACFG_AO CG Clear */
 	write32(&mtk_infracfg_ao->infracfg_ao_module_cg_0_clr, 0x10000000);
 	write32(&mtk_infracfg_ao->infracfg_ao_module_cg_1_clr, 0x21000000);

@@ -484,7 +484,6 @@ CPPFLAGS_common += -Isrc/include
 CPPFLAGS_common += -Isrc/commonlib/include
 CPPFLAGS_common += -Isrc/commonlib/bsd/include
 CPPFLAGS_common += -I$(obj)
-VBOOT_SOURCE ?= 3rdparty/vboot
 CPPFLAGS_common += -I$(VBOOT_SOURCE)/firmware/include
 CPPFLAGS_common += -include $(src)/include/kconfig.h
 CPPFLAGS_common += -include $(src)/include/rules.h
@@ -532,8 +531,8 @@ CFLAGS_common += -Wstring-compare
 ifeq ($(CONFIG_COMPILER_GCC),y)
 CFLAGS_common += -Wold-style-declaration
 CFLAGS_common += -Wcast-function-type
-# Don't add these GCC specific flags when running scan-build
-ifeq ($(CCC_ANALYZER_OUTPUT_FORMAT),)
+# Don't add these GCC specific flags when running clang-tidy
+ifeq ($(CLANG_TIDY),)
 CFLAGS_common += -Wno-packed-not-aligned
 CFLAGS_common += -fconserve-stack
 CFLAGS_common += -Wnull-dereference

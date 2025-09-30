@@ -143,11 +143,16 @@ static void read_spd(spd_ddr3_raw_data *spd, u8 addr, bool id_only)
 {
 	int j;
 	if (id_only) {
-		for (j = SPD_DDR3_MOD_ID1; j < 128; j++)
-			(*spd)[j] = smbus_read_byte(addr, j);
+		u8 *dest = &(*spd)[SPD_DDR3_MOD_ID1];
+		if (i2c_eeprom_read(addr, SPD_DDR3_MOD_ID1, 128 - SPD_DDR3_MOD_ID1, dest) < 0) {
+			for (j = SPD_DDR3_MOD_ID1; j < 128; j++)
+				(*spd)[j] = smbus_read_byte(addr, j);
+		}
 	} else {
-		for (j = 0; j < SPD_SIZE_MAX_DDR3; j++)
-			(*spd)[j] = smbus_read_byte(addr, j);
+		if (i2c_eeprom_read(addr, 0, SPD_SIZE_MAX_DDR3, *spd) < 0) {
+			for (j = 0; j < SPD_SIZE_MAX_DDR3; j++)
+				(*spd)[j] = smbus_read_byte(addr, j);
+		}
 	}
 }
 
@@ -405,6 +410,9 @@ static void init_dram_ddr3(int s3resume, const u32 cpuid)
 	} else {
 		fast_boot = s3resume;
 	}
+
+	if (fast_boot && intel_early_me_cpu_replaced())
+		fast_boot = false;
 
 	if (fast_boot) {
 		printk(BIOS_DEBUG, "Trying stored timings.\n");

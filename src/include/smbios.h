@@ -187,6 +187,9 @@ typedef enum {
 	MEMORY_FORMFACTOR_SRIMM = 0x0e,
 	MEMORY_FORMFACTOR_FBDIMM = 0x0f,
 	MEMORY_FORMFACTOR_DIE = 0x10,
+	MEMORY_FORMFACTOR_CAMM = 0x11,
+	MEMORY_FORMFACTOR_CUDIMM = 0x12,
+	MEMORY_FORMFACTOR_CSODIMM = 0x13,
 } smbios_memory_form_factor;
 
 typedef enum {
@@ -223,6 +226,7 @@ typedef enum {
 	MEMORY_TYPE_DDR5 = 0x22,
 	MEMORY_TYPE_LPDDR5 = 0x23,
 	MEMORY_TYPE_HBM3 = 0x24,
+	MEMORY_TYPE_MRDIMM = 0x25,
 } smbios_memory_type;
 
 typedef enum {

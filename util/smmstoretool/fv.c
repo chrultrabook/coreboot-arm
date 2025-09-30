@@ -11,7 +11,9 @@
 #include "udk2017.h"
 
 // The same as in `smmstore.h` header, which isn't in `commonlib`.
+#ifndef SMM_BLOCK_SIZE
 #define SMM_BLOCK_SIZE (64 * 1024)
+#endif
 
 static const EFI_GUID EfiVariableGuid = EFI_VARIABLE_GUID;
 
@@ -37,10 +39,12 @@ bool fv_init(struct mem_range_t fv)
 {
 	if (fv.length % SMM_BLOCK_SIZE != 0) {
 		fprintf(stderr,
-			"Firmware Volume size is not a multiple of 64KiB\n");
+			"Firmware Volume size is not a multiple of the block size (%dKiB)\n",
+			SMM_BLOCK_SIZE / 1024);
 		return false;
 	}
 
+	uint32_t number_of_blocks = fv.length / SMM_BLOCK_SIZE;
 	memset(fv.start, 0xff, fv.length);
 
 	const EFI_FIRMWARE_VOLUME_HEADER vol_hdr = {
@@ -58,7 +62,7 @@ bool fv_init(struct mem_range_t fv)
 			      + sizeof(EFI_FV_BLOCK_MAP_ENTRY),
 		.Revision = EFI_FVH_REVISION,
 		.BlockMap[0] = {
-			.NumBlocks = fv.length / SMM_BLOCK_SIZE,
+			.NumBlocks = number_of_blocks,
 			.Length = SMM_BLOCK_SIZE,
 		},
 	};
@@ -73,11 +77,10 @@ bool fv_init(struct mem_range_t fv)
 	++vol_hdr_dst->Checksum;
 
 	const VARIABLE_STORE_HEADER var_store_hdr = {
-		// Authentication-related fields will be filled with 0xff.
 		.Signature = EfiAuthenticatedVariableGuid,
-		// Actual size of the storage is block size, the rest is
+		// Actual size of the storage is `n / 2 - 1` blocks, the rest is
 		// Fault Tolerant Write (FTW) space and the FTW spare space.
-		.Size = SMM_BLOCK_SIZE - vol_hdr.HeaderLength,
+		.Size = ((number_of_blocks / 2 - 1) * SMM_BLOCK_SIZE) - vol_hdr.HeaderLength,
 		.Format = VARIABLE_STORE_FORMATTED,
 		.State = VARIABLE_STORE_HEALTHY,
 	};
@@ -100,7 +103,7 @@ static bool check_fw_vol_hdr(const EFI_FIRMWARE_VOLUME_HEADER *hdr,
 	if (hdr->Revision != EFI_FVH_REVISION ||
 		hdr->Signature != EFI_FVH_SIGNATURE ||
 		hdr->FvLength > max_size ||
-		hdr->HeaderLength > max_size ||
+		hdr->HeaderLength >= max_size ||
 		hdr->HeaderLength % 2 != 0) {
 		fprintf(stderr, "No firmware volume header present\n");
 		return false;
@@ -124,10 +127,10 @@ static bool check_fw_vol_hdr(const EFI_FIRMWARE_VOLUME_HEADER *hdr,
 
 static bool check_var_store_hdr(const VARIABLE_STORE_HEADER *hdr,
 				size_t max_size,
-				bool *auth_vars)
+				bool *is_auth_var_store)
 {
-	*auth_vars = guid_eq(&hdr->Signature, &EfiAuthenticatedVariableGuid);
-	if (!*auth_vars && !guid_eq(&hdr->Signature, &EfiVariableGuid)) {
+	*is_auth_var_store = guid_eq(&hdr->Signature, &EfiAuthenticatedVariableGuid);
+	if (!*is_auth_var_store && !guid_eq(&hdr->Signature, &EfiVariableGuid)) {
 		fprintf(stderr, "Variable store has unexpected GUID\n");
 		return false;
 	}
@@ -152,7 +155,7 @@ static bool check_var_store_hdr(const VARIABLE_STORE_HEADER *hdr,
 }
 
 bool fv_parse(struct mem_range_t fv, struct mem_range_t *var_store,
-	      bool *auth_vars)
+	      bool *is_auth_var_store)
 {
 	const EFI_FIRMWARE_VOLUME_HEADER *vol_hdr = (void *)fv.start;
 	if (!check_fw_vol_hdr(vol_hdr, fv.length)) {
@@ -163,7 +166,7 @@ bool fv_parse(struct mem_range_t fv, struct mem_range_t *var_store,
 	uint8_t *fw_vol_data = fv.start + vol_hdr->HeaderLength;
 	size_t volume_size = fv.length - vol_hdr->HeaderLength;
 	const VARIABLE_STORE_HEADER *var_store_hdr = (void *)fw_vol_data;
-	if (!check_var_store_hdr(var_store_hdr, volume_size, auth_vars)) {
+	if (!check_var_store_hdr(var_store_hdr, volume_size, is_auth_var_store)) {
 		fprintf(stderr, "No valid variable store was found");
 		return false;
 	}

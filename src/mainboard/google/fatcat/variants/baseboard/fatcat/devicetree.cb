@@ -8,7 +8,7 @@ chip soc/intel/pantherlake
 	#	EC host command ranges are in 0x800-0x807 & 0x200-0x20f
 	# For Fatcat variants with ITE/Nuvoton EC:
 	# 	EC host command ranges are in 0x800-0x8ff & 0x200-0x20f
-	register "gen1_dec" = "CONFIG(BOARD_GOOGLE_FATCAT) || CONFIG(BOARD_GOOGLE_FATCATISH) ? 0x00040801 : 0x00fc0801"
+	register "gen1_dec" = "CONFIG(BOARD_GOOGLE_FATCAT) || CONFIG(BOARD_GOOGLE_FATCAT4ES) || CONFIG(BOARD_GOOGLE_FATCATISH) ? 0x00040801 : 0x00fc0801"
 	register "gen2_dec" = "0x000c0201"
 	# EC memory map range is 0x900-0x9ff
 	register "gen3_dec" = "0x00fc0901"
@@ -29,6 +29,12 @@ chip soc/intel/pantherlake
 	register "tcss_ports[1]" = "TCSS_PORT_EMPTY"	# Disable USB-C Port 1
 	register "tcss_ports[2]" = "TCSS_PORT_EMPTY"	# Disable USB-C Port 2
 	register "tcss_ports[3]" = "TCSS_PORT_EMPTY"	# Disable USB-C Port 3
+
+	# Acoustic Noise settings and slew rate configuration:
+	# Slew rate for GT Domain: Fast/2
+	register "enable_acoustic_noise_mitigation" = "true"
+	register "disable_fast_pkgc_ramp[VR_DOMAIN_GT]" = "true"
+	register "slow_slew_rate_config[VR_DOMAIN_GT]" = "SLEW_FAST_2"
 
 	# Enable SAGv
 	register "sagv" = "SAGV_ENABLED"
@@ -62,22 +68,41 @@ chip soc/intel/pantherlake
 	# Enable Energy Reporting
 	register "pch_pm_energy_report_enable" = "true"
 
-	# As per document 813278, the Intel PTL-U 15W SoC supports
-	# Fast V-Mode (FVM) on cores (IA), Graphics (GT), and System
-	# Agent (SA). The ICC Limit is represented in 1/4 A
-	# increments, i.e., a value of 400 = 100A.
-	# IA VR configuration
+	# PCH PM SLP miminum assertion width and Reset Power Cycle Duration
+	register "pch_slp_s3_min_assertion_width" = "SLP_S3_ASSERTION_50_MS"
+	register "pch_slp_s4_min_assertion_width" = "SLP_S4_ASSERTION_1S"
+	register "pch_slp_sus_min_assertion_width" = "SLP_SUS_ASSERTION_1_S"
+	register "pch_slp_a_min_assertion_width" = "SLP_A_ASSERTION_98_MS"
+	register "pch_reset_power_cycle_duration" = "POWER_CYCLE_DURATION_1S"
+
+	# As per document 813278, the following PTL SoC supports Fast
+	# V-Mode (FVM) on cores (IA), Graphics (GT), and System Agent
+	# (SA). The ICC Limit is represented in 1/4 A increments,
+	# i.e., a value of 400 = 100A.
 	register "enable_fast_vmode[VR_DOMAIN_IA]" = "true"
 	register "cep_enable[VR_DOMAIN_IA]" = "true"
-	register "fast_vmode_i_trip[VR_DOMAIN_IA]" = "252" # 63A
-	# GT VR configuration
 	register "enable_fast_vmode[VR_DOMAIN_GT]" = "true"
 	register "cep_enable[VR_DOMAIN_GT]" = "true"
-	register "fast_vmode_i_trip[VR_DOMAIN_GT]" = "152" # 38A
-	# SA VR configuration
 	register "enable_fast_vmode[VR_DOMAIN_SA]" = "true"
 	register "cep_enable[VR_DOMAIN_SA]" = "true"
-	register "fast_vmode_i_trip[VR_DOMAIN_SA]" = "152" # 38A
+	register "fast_vmode_i_trip[PTL_CORE_1]" = "{
+		[VR_DOMAIN_IA] = 63 * 4,
+		[VR_DOMAIN_GT] = 38 * 4,
+		[VR_DOMAIN_SA] = 38 * 4
+	}"
+	register "fast_vmode_i_trip[PTL_CORE_2]" = "{
+		[VR_DOMAIN_IA] = 63 * 4,
+		[VR_DOMAIN_GT] = 38 * 4,
+		[VR_DOMAIN_SA] = 38 * 4
+	}"
+	register "fast_vmode_i_trip[PTL_CORE_3]" = "{
+		[VR_DOMAIN_IA] = 75 * 4,
+		[VR_DOMAIN_GT] = 75 * 4,
+		[VR_DOMAIN_SA] = 38 * 4
+	}"
+
+	# Set on-board graphics as primary display
+	register "skip_ext_gfx_scan" = "true"
 
 	# Enable CNVi BT
 	register "cnvi_bt_core" = "true"
@@ -98,6 +123,8 @@ chip soc/intel/pantherlake
 	register "pch_hda_idisp_link_tmode" = "HDA_TMODE_8T"
 	register "pch_hda_idisp_link_frequency" = "HDA_LINKFREQ_96MHZ"
 	register "pch_hda_idisp_codec_enable" = "true"
+
+	register "disable_progress_bar" = "true"
 
 	device domain 0 on
 		device ref dtt on end

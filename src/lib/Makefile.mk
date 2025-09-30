@@ -148,6 +148,7 @@ ramstage-y += hexstrtobin.c
 ramstage-y += wrdd.c
 ramstage-$(CONFIG_CONSOLE_CBMEM) += cbmem_console.c
 ramstage-$(CONFIG_BMP_LOGO) += bmp_logo.c
+ramstage-$(CONFIG_BMP_LOGO) += render_bmp.c
 ramstage-$(CONFIG_BOOTSPLASH) += bootsplash.c
 ramstage-$(CONFIG_BOOTSPLASH) += jpeg.c
 ramstage-$(CONFIG_COLLECT_TIMESTAMPS) += timestamp.c
@@ -162,6 +163,9 @@ ramstage-y += b64_decode.c
 ramstage-$(CONFIG_ACPI_NHLT) += nhlt.c
 ramstage-$(CONFIG_PAYLOAD_FIT_SUPPORT) += fit.c
 ramstage-$(CONFIG_PAYLOAD_FIT_SUPPORT) += fit_payload.c
+
+ramstage-$(CONFIG_VGA) += vga_gfx.c
+romstage-$(CONFIG_ROMSTAGE_VGA) += vga_gfx.c
 
 romstage-$(CONFIG_TIMER_QUEUE) += timer_queue.c
 ramstage-$(CONFIG_TIMER_QUEUE) += timer_queue.c
@@ -441,9 +445,10 @@ $(2)-compression := $$(BMP_LOGO_COMPRESS_FLAG)
 endef
 
 ifneq ($(CONFIG_HAVE_CUSTOM_BMP_LOGO),y)
-$(eval $(call add_bmp_logo_file_to_cbfs,CONFIG_BMP_LOGO, logo.bmp,\
-	      CONFIG_BMP_LOGO_FILE_NAME))
+$(eval $(call add_bmp_logo_file_to_cbfs,CONFIG_BMP_LOGO,logo.bmp,CONFIG_BMP_LOGO_FILE_NAME))
 endif
 
 $(eval $(call add_bmp_logo_file_to_cbfs,CONFIG_PLATFORM_HAS_LOW_BATTERY_INDICATOR, \
 	      low_battery.bmp,CONFIG_PLATFORM_LOW_BATTERY_INDICATOR_LOGO_PATH))
+$(eval $(call add_bmp_logo_file_to_cbfs,CONFIG_SPLASH_SCREEN_FOOTER, \
+	      footer_logo.bmp,CONFIG_SPLASH_SCREEN_FOOTER_LOGO_PATH))

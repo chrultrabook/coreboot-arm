@@ -1,10 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
-#include <option.h>
-#include <device/device.h>
-
-#include <southbridge/intel/common/gpio.h>
 #include <console/console.h>
+#include <device/device.h>
+#include <gpio.h>
+#include <option.h>
 #include "chip.h"
 
 /*
@@ -20,7 +19,7 @@ static void lenovo_hybrid_graphics_enable(struct device *dev)
 	dev->enabled = 0;
 
 	config = dev->chip_info;
-	if (!config || (get_gpio(config->detect_gpio) == DGPU_NOT_INSTALLED)) {
+	if (!config || (gpio_get(config->detect_gpio) == DGPU_NOT_INSTALLED)) {
 		printk(BIOS_DEBUG, "Hybrid graphics: Not installed\n");
 		return;
 	}
@@ -32,22 +31,22 @@ static void lenovo_hybrid_graphics_enable(struct device *dev)
 		       " Switching panel to discrete GPU.\n");
 
 		if (config->has_panel_hybrid_gpio)
-			set_gpio(config->panel_hybrid_gpio,
+			gpio_set(config->panel_hybrid_gpio,
 				 !config->panel_integrated_lvl);
 
 		if (config->has_backlight_gpio)
-			set_gpio(config->backlight_gpio,
+			gpio_set(config->backlight_gpio,
 				 !config->backlight_integrated_lvl);
 	} else {
 		printk(BIOS_DEBUG, "Hybrid graphics:"
 		       " Switching panel to integrated GPU.\n");
 
 		if (config->has_panel_hybrid_gpio)
-			set_gpio(config->panel_hybrid_gpio,
+			gpio_set(config->panel_hybrid_gpio,
 				 config->panel_integrated_lvl);
 
 		if (config->has_backlight_gpio)
-			set_gpio(config->backlight_gpio,
+			gpio_set(config->backlight_gpio,
 				 config->backlight_integrated_lvl);
 	}
 }

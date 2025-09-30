@@ -11,4 +11,7 @@ romstage-y += regulator.c
 
 ramstage-y += boardid.c
 ramstage-y += mainboard.c
+ramstage-y += panel.c
 ramstage-y += regulator.c
+
+ramstage-$(CONFIG_BOARD_GOOGLE_PADME) += panel_padme.c

@@ -128,6 +128,7 @@ static void print_types(FILE *f)
 	fprintf(f, " * uint64 (0..2^64-1)\n");
 	fprintf(f, " * ascii (NUL-terminated)\n");
 	fprintf(f, " * unicode (widened and NUL-terminated)\n");
+	fprintf(f, " * file (input only; file contents as variable)\n");
 	fprintf(f, " * raw (output only; raw bytes on output)\n");
 }
 
@@ -139,6 +140,7 @@ static void help_set(FILE *f, const struct subcommand_t *info)
 	fprintf(f, "      -n variable-name \\\n");
 	fprintf(f, "      -t variable-type \\\n");
 	fprintf(f, "      -v value\n");
+	fprintf(f, "      -a\n");
 	fprintf(f, "\n");
 	print_types(f);
 }
@@ -149,8 +151,9 @@ static int process_set(int argc, char *argv[], const char store_file[])
 	const char *value = NULL;
 	const char *type_str = NULL;
 	const char *guid_str = NULL;
+	bool authenticated_var = false;
 	int opt;
-	while ((opt = getopt(argc, argv, "n:t:v:g:")) != -1) {
+	while ((opt = getopt(argc, argv, "n:t:v:g:a::")) != -1) {
 		switch (opt) {
 		case 'n':
 			name = optarg;
@@ -163,6 +166,9 @@ static int process_set(int argc, char *argv[], const char store_file[])
 			break;
 		case 'g':
 			guid_str = optarg;
+			break;
+		case 'a':
+			authenticated_var = true;
 			break;
 
 		case '?': /* parsing error */
@@ -216,6 +222,7 @@ static int process_set(int argc, char *argv[], const char store_file[])
 	struct var_t *var = vs_find(&storage.vs, name, &guid);
 	if (var == NULL) {
 		var = vs_new_var(&storage.vs);
+		var->attrs |= authenticated_var ? EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS : 0;
 		var->name = to_uchars(name, &var->name_size);
 		var->data = data;
 		var->data_size = data_size;

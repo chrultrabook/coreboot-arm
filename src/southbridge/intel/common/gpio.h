@@ -4,22 +4,8 @@
 #define INTEL_COMMON_GPIO_H
 
 #include <stdint.h>
-
-/* ICH7 GPIOBASE */
-#define GPIO_USE_SEL	0x00
-#define GP_IO_SEL	0x04
-#define GP_LVL		0x0c
-#define GPO_BLINK	0x18
-#define GPI_INV		0x2c
-#define GPIO_USE_SEL2	0x30
-#define GP_IO_SEL2	0x34
-#define GP_LVL2		0x38
-#define GPIO_USE_SEL3	0x40
-#define GP_IO_SEL3	0x44
-#define GP_LVL3		0x48
-#define GP_RST_SEL1	0x60
-#define GP_RST_SEL2	0x64
-#define GP_RST_SEL3	0x68
+#include <stdbool.h>
+#include <soc/gpio.h>
 
 #define GPIO_MODE_NATIVE	0
 #define GPIO_MODE_GPIO		1
@@ -30,9 +16,6 @@
 
 #define GPIO_NO_INVERT		0
 #define GPIO_INVERT		1
-
-#define GPIO_LEVEL_LOW		0
-#define GPIO_LEVEL_HIGH		1
 
 #define GPIO_NO_BLINK		0
 #define GPIO_BLINK		1
@@ -153,18 +136,9 @@ extern const struct pch_gpio_map mainboard_gpio_map;
 /* Configure GPIOs with mainboard provided settings */
 void setup_pch_gpios(const struct pch_gpio_map *gpio);
 
-/* get GPIO pin value */
-int get_gpio(int gpio_num);
-/*
- * get a number comprised of multiple GPIO values. gpio_num_array points to
- * the array of gpio pin numbers to scan, terminated by -1.
- */
-unsigned int get_gpios(const int *gpio_num_array);
-
-void set_gpio(int gpio_num, int value);
-
-void clear_gpio(int gpio_num);
-
 int gpio_is_native(int gpio_num);
+
+/* Enable/disable GPI_INV for the specified GPIO */
+void gpio_invert(gpio_t gpio_num, bool invert);
 
 #endif

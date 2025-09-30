@@ -172,12 +172,14 @@ amd_fw_entry amd_psp_fw_table[] = {
 	{ .type = AMD_FW_PSP_SMU_FIRMWARE, .subprog = 1, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_SMU_FIRMWARE, .subprog = 2, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_SECURED_DEBUG, .level = PSP_LVL2 | PSP_LVL2_AB,
-									.skip_hashing = true },
+	  .skip_hashing = true },
+	{ .type = AMD_FW_PSP_TEEIPKEY, .subprog = 0, .level = PSP_LVL2 | PSP_LVL2_AB,
+	  .skip_hashing = true },
 	{ .type = AMD_FW_ABL_PUBKEY, .level = PSP_BOTH | PSP_BOTH_AB },
 	{ .type = AMD_PSP_FUSE_CHAIN, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_TRUSTLETS, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_TRUSTLETKEY, .level = PSP_LVL2 | PSP_LVL2_AB },
-	{ .type = AMD_FW_PSP_SMU_FIRMWARE2, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_PSP_SMU_FIRMWARE2, .subprog = 0, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_SMU_FIRMWARE2, .subprog = 1, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_SMU_FIRMWARE2, .subprog = 2, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_BOOT_DRIVER, .level = PSP_BOTH | PSP_LVL2_AB },
@@ -187,6 +189,7 @@ amd_fw_entry amd_psp_fw_table[] = {
 	{ .type = AMD_DEBUG_UNLOCK, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_HW_IPCFG, .subprog = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_HW_IPCFG, .subprog = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_HW_IPCFG, .subprog = 2, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_WRAPPED_IKEK, .level = PSP_BOTH | PSP_LVL2_AB, .skip_hashing = true },
 	{ .type = AMD_TOKEN_UNLOCK, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_SEC_GASKET, .subprog = 0, .level = PSP_BOTH | PSP_LVL2_AB },
@@ -226,7 +229,8 @@ amd_fw_entry amd_psp_fw_table[] = {
 	{ .type = AMD_FW_SPL, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_DMCU_ERAM, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_DMCU_ISR, .level = PSP_LVL2 | PSP_LVL2_AB },
-	{ .type = AMD_FW_MSMU, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MSMU, .subprog = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MSMU, .subprog = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_SPIROM_CFG, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_MPIO, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_PSP_SMUSCS, .level = PSP_BOTH | PSP_LVL2_AB },
@@ -235,6 +239,7 @@ amd_fw_entry amd_psp_fw_table[] = {
 		.generate_manifest = true },
 	{ .type = AMD_RIB, .subprog = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_RIB, .subprog = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_RIB, .subprog = 2, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_MPDMA_TF, .level = PSP_BOTH | PSP_BOTH_AB },
 	{ .type = AMD_TA_IKEK, .level = PSP_BOTH | PSP_LVL2_AB, .skip_hashing = true },
 	{ .type = AMD_FW_GMI3_PHY, .level = PSP_BOTH | PSP_BOTH_AB },
@@ -242,18 +247,33 @@ amd_fw_entry amd_psp_fw_table[] = {
 	{ .type = AMD_FW_AMF_SRAM, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_AMF_DRAM, .inst = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_AMF_DRAM, .inst = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MFD_MPM, .inst = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MFD_MPM, .inst = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_FCFG_TABLE, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_AMF_WLAN, .inst = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_AMF_WLAN, .inst = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_AMF_WLAN, .inst = 2, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_AMF_WLAN, .inst = 3, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_AMF_MFD, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_TA_IKEK, .level = PSP_BOTH | PSP_LVL2_AB, .skip_hashing = true },
-	{ .type = AMD_FW_MPCCX, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MPCCX, .subprog = 0, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_MPCCX, .subprog = 1, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_LSDMA, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_C20_MP, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_MINIMSMU, .inst = 0, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_MINIMSMU, .inst = 1, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_MINIMSMU, .subprog = 1, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_GFXIMU_0, .subprog = 0, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_GFXIMU_0, .subprog = 1, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_GFXIMU_1, .subprog = 0, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_GFXIMU_1, .subprog = 1, .level = PSP_BOTH | PSP_LVL2_AB },
+	{ .type = AMD_FW_GFXIMU_2, .level = PSP_BOTH | PSP_LVL2_AB },
 	{ .type = AMD_FW_SRAM_FW_EXT, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_UMSMU, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_S3IMG, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_USBDP, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_USBSS, .level = PSP_LVL2 | PSP_LVL2_AB },
+	{ .type = AMD_FW_USB4, .level = PSP_LVL2 | PSP_LVL2_AB },
 	{ .type = AMD_FW_INVALID },
 };
 
@@ -303,6 +323,7 @@ amd_bios_entry amd_bios_table[] = {
 	{ .type = AMD_BIOS_BIN,
 			.reset = 1, .copy = 1, .zlib = 1, .inst = 0, .level = BDT_BOTH },
 	{ .type = AMD_BIOS_APOB_NV, .level = BDT_LVL2 },
+	{ .type = AMD_BIOS_NV_ST, .level = BDT_LVL2 },
 	{ .type = AMD_BIOS_PMUI, .inst = 1, .subpr = 0, .level = BDT_BOTH },
 	{ .type = AMD_BIOS_PMUD, .inst = 1, .subpr = 0, .level = BDT_BOTH },
 	{ .type = AMD_BIOS_PMUI, .inst = 2, .subpr = 0, .level = BDT_BOTH },
@@ -533,6 +554,30 @@ static void *new_combo_dir(context *ctx, uint32_t cookie)
 	return ptr;
 }
 
+/*
+ * For some SOC generations the APOB_NV binary seems to be treated special regarding the
+ * interpretaion of the source address. No matter the address_mode specified for the address
+ * the memory ABL always seems to the interpret the source address as MMIO address even if
+ * AMD_ADDR_REL_BIOS is specified. So for them we need to always use an MMIO address.
+ * This seems to be a bug which affects all SOCs before phoenix generation.
+ */
+static bool has_apob_nv_quirk(enum platform platform_type)
+{
+	switch (platform_type) {
+	case PLATFORM_CARRIZO:
+	case PLATFORM_STONEYRIDGE:
+	case PLATFORM_RAVEN:
+	case PLATFORM_PICASSO:
+	case PLATFORM_RENOIR:
+	case PLATFORM_CEZANNE:
+	case PLATFORM_MENDOCINO:
+	case PLATFORM_LUCIENNE:
+		return true;
+	default:
+		return false;
+	}
+}
+
 static void copy_psp_header(void *bak, void *orig)
 {
 	uint32_t count = ((psp_directory_header *)orig)->num_entries;
@@ -541,17 +586,17 @@ static void copy_psp_header(void *bak, void *orig)
 
 static void fill_dir_header(void *directory, uint32_t count, context *ctx)
 {
+	if (ctx == NULL || directory == NULL) {
+		fprintf(stderr, "Calling %s with NULL pointers\n", __func__);
+		return;
+	}
+
 	psp_combo_directory *cdir = directory;
 	psp_directory_table *dir = directory;
 	bios_directory_table *bdir = directory;
 	/* The cookies have same offsets. */
 	uint32_t cookie = ((psp_directory_table *)directory)->header.cookie;
 	uint32_t table_size = 0;
-
-	if (ctx == NULL || directory == NULL) {
-		fprintf(stderr, "Calling %s with NULL pointers\n", __func__);
-		return;
-	}
 
 	/* The table size needs to be 0x1000 aligned. So align the end of table. */
 	adjust_current_pointer(ctx, 0, TABLE_ALIGNMENT);
@@ -1410,24 +1455,28 @@ static void integrate_bios_firmwares(context *ctx,
 			biosdir->entries[count].address_mode = SET_ADDR_MODE_BY_TABLE(biosdir);
 			break;
 		case AMD_BIOS_APOB_NV:
-			if (fw_table[i].src) {
-				/* If source is given, use that and its size */
+			if (has_apob_nv_quirk(cb_config->soc_id)) {
+				/*
+				 * once ROM3 mapping (>16MiB) is used on any SOC that
+				 * has the apob quirk, this needs to be updated, since
+				 * using an MMIO address is then not as simply as adding
+				 * the SPI_ROM_BASE offset anymore.
+				 */
+				if (fw_table[i].src + fw_table[i].size >= 16*MiB) {
+					fprintf(stderr,
+						"APOB_NV location too high (0x%lx + 0x%lx)\n",
+						fw_table[i].src, fw_table[i].size);
+					amdfwtool_cleanup(ctx);
+					exit(1);
+				}
+				biosdir->entries[count].source = fw_table[i].src + SPI_ROM_BASE; // convert to MMIO address
+				biosdir->entries[count].address_mode = AMD_ADDR_PHYSICAL;
+			} else {
 				biosdir->entries[count].source = fw_table[i].src;
 				biosdir->entries[count].address_mode =
-						SET_ADDR_MODE(biosdir, AMD_ADDR_REL_BIOS);
-				biosdir->entries[count].size = fw_table[i].size;
-			} else {
-				/* Else reserve size bytes within amdfw.rom */
-				adjust_current_pointer(ctx, 0, ERASE_ALIGNMENT);
-				biosdir->entries[count].source = RUN_CURRENT(*ctx);
-				biosdir->entries[count].address_mode =
-						SET_ADDR_MODE(biosdir, AMD_ADDR_REL_BIOS);
-				biosdir->entries[count].size = ALIGN_UP(
-						fw_table[i].size, ERASE_ALIGNMENT);
-				memset(BUFF_CURRENT(*ctx), 0xff,
-						biosdir->entries[count].size);
-				adjust_current_pointer(ctx, biosdir->entries[count].size, 1);
+					SET_ADDR_MODE(biosdir, AMD_ADDR_REL_BIOS);
 			}
+			biosdir->entries[count].size = fw_table[i].size;
 			break;
 		case AMD_BIOS_BIN:
 			/* Don't make a 2nd copy, point to the same one */

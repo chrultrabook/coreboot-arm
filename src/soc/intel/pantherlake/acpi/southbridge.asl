@@ -6,8 +6,6 @@
 
 /* PCR access */
 #include <soc/intel/common/acpi/pch_pcr.asl>
-/* IOE PCR access */
-#include <soc/intel/common/acpi/ioe_pcr.asl>
 
 /* PCIE src clock control */
 #include <soc/intel/common/acpi/pcie_clk.asl>
@@ -56,6 +54,6 @@
 #endif
 
 /* UFS 0:17:0 */
-#if CONFIG(SOC_INTEL_PANTHERLAKE_U_H)
+#if CONFIG(SOC_INTEL_WILDCATLAKE)
 #include <soc/intel/common/block/acpi/acpi/ufs.asl>
 #endif

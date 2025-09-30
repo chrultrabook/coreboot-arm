@@ -148,7 +148,6 @@ chip soc/intel/cannonlake
 				register "generic.hid"		= ""STAR0001""
 				register "generic.desc"		= ""Touchpad""
 				register "generic.irq"		= "ACPI_IRQ_LEVEL_LOW(GPP_B3_IRQ)"
-				register "generic.detect"	= "1"
 				register "hid_desc_reg_offset"	= "0x20"
 				device i2c 2c on end
 			end
@@ -162,7 +161,7 @@ chip soc/intel/cannonlake
 		device ref i2c4 on  end
 		device ref uart2 on  end
 		device ref pcie_rp9 on						# SSD x4
-			register "PcieRpSlotImplemented[8]"	= "1"
+			register "PcieRpSlotImplemented[8]"	= "true"
 			register "PcieRpLtrEnable[8]"		= "true"
 			register "PcieClkSrcUsage[1]"		= "0x08"
 			register "PcieClkSrcClkReq[1]"		= "1"

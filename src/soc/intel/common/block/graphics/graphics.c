@@ -12,8 +12,18 @@
 #include <intelblocks/cfg.h>
 #include <intelblocks/graphics.h>
 #include <fsp/graphics.h>
+#include <fsp/util.h>
 #include <soc/pci_devs.h>
 #include <types.h>
+
+/*
+ * This GUID is used to identify memory resources related to the memory bandwidth
+ * compression functionality for Intel Integrated Graphics Devices (IGD).
+ */
+static const uint8_t memory_compression_guid[16] = {
+	0x79, 0x15, 0x9f, 0x8a, 0x72, 0xea, 0xb5, 0x4b,
+	0x90, 0x69, 0x54, 0x9a, 0x1b, 0xf7, 0xc4, 0xfd
+};
 
 /* Display Type:
 *  0 - only internal display aka eDP attached
@@ -288,6 +298,15 @@ static void graphics_dev_read_resources(struct device *dev)
 		pci_dev_set_resources(dev);
 		res_bar0->flags |= IORESOURCE_FIXED;
 	}
+
+	const struct hob_resource *res =
+		fsp_find_resource_hob_by_guid(memory_compression_guid);
+	if (res) {
+		printk(BIOS_DEBUG,
+		       "Memory Compression HOB found: base=0x%08llx length=0x%08llx\n",
+		       res->addr, res->length);
+		reserved_ram_range(dev, 0, res->addr, res->length);
+	}
 }
 
 static void graphics_join_mbus(void)
@@ -348,6 +367,7 @@ static const unsigned short pci_device_ids[] = {
 	PCI_DID_INTEL_PTL_H_GT2_1,
 	PCI_DID_INTEL_PTL_H_GT2_2,
 	PCI_DID_INTEL_PTL_H_GT2_3,
+	PCI_DID_INTEL_PTL_H_GT2_4,
 	PCI_DID_INTEL_LNL_M_GT2,
 	PCI_DID_INTEL_RPL_U_GT1,
 	PCI_DID_INTEL_RPL_U_GT2,

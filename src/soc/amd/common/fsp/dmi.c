@@ -23,11 +23,11 @@
  */
 static uint16_t ddr_speed_mhz_to_reported_mts(uint16_t ddr_type, uint16_t speed)
 {
-	if (CONFIG(USE_DDR4) && ddr_type == MEMORY_TYPE_DDR4)
+	if (CONFIG(DRAM_SUPPORT_DDR4) && ddr_type == MEMORY_TYPE_DDR4)
 		return ddr4_speed_mhz_to_reported_mts(speed);
-	else if (CONFIG(USE_LPDDR4) && ddr_type == MEMORY_TYPE_LPDDR4)
+	else if (CONFIG(DRAM_SUPPORT_LPDDR4) && ddr_type == MEMORY_TYPE_LPDDR4)
 		return lpddr4_speed_mhz_to_reported_mts(speed);
-	else if (CONFIG(USE_DDR5) && (ddr_type == MEMORY_TYPE_DDR5 ||
+	else if (CONFIG(DRAM_SUPPORT_DDR5) && (ddr_type == MEMORY_TYPE_DDR5 ||
 			ddr_type == MEMORY_TYPE_LPDDR5))
 		return ddr5_speed_mhz_to_reported_mts(speed);
 
@@ -218,9 +218,12 @@ static void prepare_dmi_16_17(void *unused)
 	for (unsigned int channel = 0; channel < AGESA_STRUCT_CHANNELS_PER_SOCKET; channel++) {
 		for (unsigned int dimm = 0; dimm < AGESA_STRUCT_DIMMS_PER_CHANNEL; dimm++) {
 			type17_dmi_info = &dmi_table->T17[0][channel][dimm];
-			/* DIMMs that are present will have a non-zero
-			   handle. */
-			if (type17_dmi_info->Handle == 0)
+			/*
+			 * DIMMs that are present will always have a non-zero handle.
+			 * FSP will set the MemoryType to UNKNOWN if DIMM not present.
+			 */
+			if (type17_dmi_info->Handle == 0 ||
+					type17_dmi_info->MemoryType == MEMORY_TYPE_UNKNOWN)
 				continue;
 			print_dmi_info(type17_dmi_info);
 			dimm_info = &mem_info->dimm[dimm_cnt];

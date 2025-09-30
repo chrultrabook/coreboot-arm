@@ -162,6 +162,7 @@ static const struct {
 	{ PCI_DID_INTEL_ADL_M_ID_1, ADL_M_282_15W_CORE, TDP_15W },
 	{ PCI_DID_INTEL_ADL_M_ID_2, ADL_M_242_CORE, TDP_9W },
 	{ PCI_DID_INTEL_ADL_N_ID_1, ADL_N_081_15W_CORE, TDP_15W },
+	{ PCI_DID_INTEL_ADL_N_ID_1, ADL_N_081_7W_CORE, TDP_7W },
 	{ PCI_DID_INTEL_ADL_N_ID_2, ADL_N_041_6W_CORE, TDP_6W },
 	{ PCI_DID_INTEL_ADL_N_ID_3, ADL_N_041_6W_CORE, TDP_6W },
 	{ PCI_DID_INTEL_ADL_N_ID_4, ADL_N_021_6W_CORE, TDP_6W },
@@ -197,6 +198,7 @@ static const struct {
 	{ PCI_DID_INTEL_RPL_P_ID_6, RPL_P_682_642_482_45W_CORE, TDP_45W },
 	{ PCI_DID_INTEL_RPL_P_ID_7, RPL_P_682_642_482_45W_CORE, TDP_45W },
 	{ PCI_DID_INTEL_RPL_P_ID_8, RPL_P_682_642_482_45W_CORE, TDP_45W },
+	{ PCI_DID_INTEL_RPL_P_ID_8, RPL_P_682_482_282_28W_CORE, TDP_28W },
 	{ PCI_DID_INTEL_RPL_S_ID_1, RPL_S_8161_35W_CORE, TDP_35W },
 	{ PCI_DID_INTEL_RPL_S_ID_1, RPL_S_8161_65W_CORE, TDP_65W },
 	{ PCI_DID_INTEL_RPL_S_ID_1, RPL_S_8161_95W_CORE, TDP_95W },
@@ -340,6 +342,12 @@ enum slew_rate {
 	SLEW_FAST_16
 };
 
+enum sata_speed_limit {
+	SATA_DEFAULT,
+	SATA_GEN1,	/* 1.5 Gbps */
+	SATA_GEN2	/* 3.0 Gbps */
+};
+
 struct soc_intel_alderlake_config {
 	/* Common struct containing soc config data required by common code */
 	struct soc_intel_common_config common_soc_config;
@@ -415,6 +423,7 @@ struct soc_intel_alderlake_config {
 	bool sata_salp_support;
 	bool sata_ports_enable[8];
 	bool sata_ports_dev_slp[8];
+	enum sata_speed_limit sata_speed;
 
 	/*
 	 * Enable(0)/Disable(1) SATA Power Optimizer on PCH side.

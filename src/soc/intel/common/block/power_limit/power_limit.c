@@ -243,7 +243,7 @@ u8 get_cpu_tdp(void)
 
 WEAK_DEV_PTR(dptf_policy);
 
-#if CONFIG(SOC_INTEL_COMMON_BLOCK_VARIANT_POWER_LIMIT)
+#if ENV_RAMSTAGE && CONFIG(SOC_INTEL_COMMON_BLOCK_VARIANT_POWER_LIMIT)
 void variant_update_cpu_power_limits(const struct cpu_tdp_power_limits *limits,
 		size_t num_entries)
 {
@@ -283,6 +283,7 @@ void variant_update_cpu_power_limits(const struct cpu_tdp_power_limits *limits,
 			settings->pl2.min_power = limits[index].pl2_min_power;
 			settings->pl2.max_power = limits[index].pl2_max_power;
 			soc_config->tdp_pl4 = DIV_ROUND_UP(limits[index].pl4_power, MILLIWATTS_TO_WATTS);
+			soc_config->tdp_pl4_fastvmode = soc_config->tdp_pl4;
 			printk(BIOS_INFO, "Overriding power limits PL1 (mW) (%u, %u) PL2 (mW) (%u, %u) PL4 (W) (%u)\n",
 				settings->pl1.min_power,
 				settings->pl1.max_power,

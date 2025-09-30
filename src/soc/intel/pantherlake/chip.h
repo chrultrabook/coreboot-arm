@@ -53,10 +53,12 @@ enum soc_intel_pantherlake_sagv_gears {
 };
 
 enum soc_intel_pantherlake_power_limits {
-	PTL_U_1_CORE,
-	PTL_H_1_CORE,
-	PTL_H_2_CORE,
-	PTL_H_3_CORE,
+	PTL_CORE_1,
+	PTL_CORE_2,
+	PTL_CORE_3,
+	PTL_CORE_4,
+	PTL_CORE_5,
+	WCL_CORE,
 	PTL_POWER_LIMITS_COUNT,
 };
 
@@ -67,17 +69,46 @@ enum soc_intel_pantherlake_cpu_tdps {
 	TDP_45W = 45,
 };
 
+enum soc_intel_pantherlake_sku {
+	PTL_SKU_1,
+	PTL_SKU_2,
+	PTL_SKU_3,
+	PTL_SKU_4,
+	PTL_SKU_5,
+	WCL_SKU_1,
+	WCL_SKU_2,
+	WCL_SKU_3,
+	WCL_SKU_4,
+	WCL_SKU_5,
+	MAX_PTL_SKUS,
+};
+
 /* Mapping of different SKUs based on CPU ID and TDP values */
-static const struct {
+static const struct soc_intel_pantherlake_power_map {
 	unsigned int cpu_id;
 	enum soc_intel_pantherlake_power_limits limits;
 	enum soc_intel_pantherlake_cpu_tdps cpu_tdp;
+	enum soc_intel_pantherlake_sku sku;
 } cpuid_to_ptl[] = {
-	{ PCI_DID_INTEL_PTL_U_ID_1, PTL_U_1_CORE, TDP_15W },
-	{ PCI_DID_INTEL_PTL_H_ID_1, PTL_H_1_CORE, TDP_25W },
-	{ PCI_DID_INTEL_PTL_H_ID_2, PTL_H_1_CORE, TDP_25W },
-	{ PCI_DID_INTEL_PTL_H_ID_3, PTL_H_2_CORE, TDP_25W },
-	{ PCI_DID_INTEL_PTL_H_ID_4, PTL_H_2_CORE, TDP_25W },
+	{ PCI_DID_INTEL_PTL_U_ID_1, PTL_CORE_1, TDP_15W, PTL_SKU_1 },
+	{ PCI_DID_INTEL_PTL_U_ID_1, PTL_CORE_1, TDP_25W, PTL_SKU_1 },
+	{ PCI_DID_INTEL_PTL_U_ID_2, PTL_CORE_2, TDP_15W, PTL_SKU_5 },
+	{ PCI_DID_INTEL_PTL_U_ID_2, PTL_CORE_2, TDP_25W, PTL_SKU_5 },
+	{ PCI_DID_INTEL_PTL_U_ID_3, PTL_CORE_2, TDP_15W, PTL_SKU_1 },
+	{ PCI_DID_INTEL_PTL_U_ID_3, PTL_CORE_2, TDP_25W, PTL_SKU_1 },
+	{ PCI_DID_INTEL_PTL_H_ID_1, PTL_CORE_3, TDP_25W, PTL_SKU_2 },
+	{ PCI_DID_INTEL_PTL_H_ID_2, PTL_CORE_3, TDP_25W, PTL_SKU_3 },
+	{ PCI_DID_INTEL_PTL_H_ID_3, PTL_CORE_4, TDP_25W, PTL_SKU_2 },
+	{ PCI_DID_INTEL_PTL_H_ID_4, PTL_CORE_4, TDP_25W, PTL_SKU_2 },
+	{ PCI_DID_INTEL_PTL_H_ID_5, PTL_CORE_4, TDP_25W, PTL_SKU_4 },
+	{ PCI_DID_INTEL_PTL_H_ID_6, PTL_CORE_4, TDP_25W, PTL_SKU_4 },
+	{ PCI_DID_INTEL_PTL_H_ID_7, PTL_CORE_4, TDP_25W, PTL_SKU_4 },
+	{ PCI_DID_INTEL_PTL_H_ID_8, PTL_CORE_4, TDP_25W, PTL_SKU_2 },
+	{ PCI_DID_INTEL_WCL_ID_1, WCL_CORE, TDP_15W, WCL_SKU_1},
+	{ PCI_DID_INTEL_WCL_ID_2, WCL_CORE, TDP_15W, WCL_SKU_2},
+	{ PCI_DID_INTEL_WCL_ID_3, WCL_CORE, TDP_15W, WCL_SKU_3},
+	{ PCI_DID_INTEL_WCL_ID_4, WCL_CORE, TDP_15W, WCL_SKU_4},
+	{ PCI_DID_INTEL_WCL_ID_5, WCL_CORE, TDP_15W, WCL_SKU_5},
 };
 
 /* Types of display ports */
@@ -328,12 +359,21 @@ struct soc_intel_pantherlake_config {
 	bool cep_enable[NUM_VR_DOMAINS];
 
 	/*
-	 * VR Fast Vmode I_TRIP threshold.
+	 * Fast Vmode I_TRIP Thresholds for VR Domains
+	 *
+	 * This two-dimensional array represents the Fast Vmode I_TRIP thresholds
+	 * for various Voltage Regulator (VR) domains across different power limit
+	 * configurations in Panther Lake SoCs.
+	 *
+	 * The Fast Vmode I_TRIP threshold is used to override the default current
+	 * threshold settings, ensuring optimal power management by adapting to
+	 * specific VR domain requirements under different power limit scenarios.
+	 *
 	 * 0-255A in 1/4 A units. Example: 400 = 100A
 	 * This setting overrides the default value set by FSPs when Fast VMode
 	 * is enabled.
 	 */
-	uint16_t fast_vmode_i_trip[NUM_VR_DOMAINS];
+	uint16_t fast_vmode_i_trip[PTL_POWER_LIMITS_COUNT][NUM_VR_DOMAINS];
 
 	/*
 	 * Power state current threshold 1.
@@ -358,6 +398,23 @@ struct soc_intel_pantherlake_config {
 	 * SA, [3] through [5] are Reserved.
 	 */
 	uint16_t ps_cur_3_threshold[NUM_VR_DOMAINS];
+
+	/*
+	 * Thermal Design Current (TDC) settings for various SKUs.
+	 *
+	 * This multidimensional array stores the Thermal Design Current (TDC)
+	 * values for different power limit configurations across multiple SKUs
+	 * and Voltage Regulator (VR) domains. TDC values indicate the maximum
+	 * allowable current for a given thermal configuration, which helps in
+	 * managing thermal constraints for each VR domain under specific power
+	 * limit scenarios.
+	 *
+	 * Each entry in the array is indexed by SKU and VR domain, providing
+	 * tailored TDC values for specific power management requirements.
+	 *
+	 * The TDC unit is defined 1/8A increments.
+	 */
+	uint16_t thermal_design_current[MAX_PTL_SKUS][NUM_VR_DOMAINS];
 
 	/*
 	 * SerialIO device mode selection:
@@ -478,6 +535,62 @@ struct soc_intel_pantherlake_config {
 		ISA_SERIAL_BASE_ADDR_2F8,
 	} isa_serial_uart_base;
 
+	/* PCH PM SLP_S3 Minimum Assertion Width */
+	enum {
+		SLP_S3_ASSERTION_DEFAULT,
+		SLP_S3_ASSERTION_60_US,
+		SLP_S3_ASSERTION_1_MS,
+		SLP_S3_ASSERTION_50_MS,
+		SLP_S3_ASSERTION_2_S,
+	} pch_slp_s3_min_assertion_width;
+
+	/* PCH PM SLP_S4 Minimum Assertion Width */
+	enum {
+		SLP_S4_ASSERTION_DEFAULT,
+		SLP_S4_ASSERTION_1S,
+		SLP_S4_ASSERTION_2S,
+		SLP_S4_ASSERTION_3S,
+		SLP_S4_ASSERTION_4S,
+	} pch_slp_s4_min_assertion_width;
+
+	/* PCH PM SLP_SUS Minimum Assertion Width */
+	enum {
+		SLP_SUS_ASSERTION_DEFAULT,
+		SLP_SUS_ASSERTION_0_MS,
+		SLP_SUS_ASSERTION_500_MS,
+		SLP_SUS_ASSERTION_1_S,
+		SLP_SUS_ASSERTION_4_S,
+	} pch_slp_sus_min_assertion_width;
+
+	/* PCH PM SLP_A Minimum Assertion Width */
+	enum {
+		SLP_A_ASSERTION_DEFAULT,
+		SLP_A_ASSERTION_0_MS,
+		SLP_A_ASSERTION_4_S,
+		SLP_A_ASSERTION_98_MS,
+		SLP_A_ASSERTION_2_S,
+	} pch_slp_a_min_assertion_width;
+
+	/*
+	 * PCH PM Reset Power Cycle Duration
+	 * The Reset Power Cycle Duration starts at 20ms and increases by 20ms for each step,
+	 * beginning from 0x0 in hexadecimal. Each subsequent hexadecimal increment corresponds
+	 * to an additional 20 milliseconds in duration.
+	 * NOTE: Duration programmed in the PchPmPwrCycDur should never be smaller than the
+	 * stretch duration programmed in the following registers:
+	 *  - GEN_PMCON_A.SLP_S3_MIN_ASST_WDTH (PchPmSlpS3MinAssert)
+	 *  - GEN_PMCON_A.S4MAW (PchPmSlpS4MinAssert)
+	 *  - PM_CFG.SLP_A_MIN_ASST_WDTH (PchPmSlpAMinAssert)
+	 *  - PM_CFG.SLP_LAN_MIN_ASST_WDTH
+	 */
+	enum {
+		POWER_CYCLE_DURATION_DEFAULT,
+		POWER_CYCLE_DURATION_1S,
+		POWER_CYCLE_DURATION_2S,
+		POWER_CYCLE_DURATION_3S,
+		POWER_CYCLE_DURATION_4S,
+	} pch_reset_power_cycle_duration;
+
 	/*
 	 * Enable or Disable C1 C-state Auto Demotion & un-demotion
 	 * The algorithm looks at the behavior of the wake up tracker, how
@@ -554,6 +667,9 @@ struct soc_intel_pantherlake_config {
 	 * for wake will be exposed in ACPI
 	 */
 	bool thc_wake_on_touch[NUM_THC];
+
+	/* Disable the progress bar during MRC training operations. */
+	bool disable_progress_bar;
 };
 
 typedef struct soc_intel_pantherlake_config config_t;

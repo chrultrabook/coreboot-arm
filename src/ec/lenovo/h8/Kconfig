@@ -6,6 +6,9 @@ config EC_LENOVO_H8
 
 if EC_LENOVO_H8
 
+config NO_POST
+	default y
+
 config SEABIOS_PS2_TIMEOUT
 	int
 	depends on PAYLOAD_SEABIOS
@@ -64,5 +67,17 @@ config THINKPADEC_HKEY_EISAID
 	help
 	  Motherboards of newer thinkpad models can override the default to match
 	  vendor drivers and quirks.
+
+config H8_HAS_BDC_GPIO_DETECTION
+	bool
+	default n
+
+config H8_HAS_WWAN_GPIO_DETECTION
+	bool
+	default n
+
+config H8_HAS_2ND_THERMAL_ZONE
+	bool
+	default n
 
 endif # EC_LENOVO_H8

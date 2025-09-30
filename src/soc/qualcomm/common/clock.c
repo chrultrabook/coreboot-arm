@@ -59,6 +59,15 @@ void clock_reset_bcr(void *bcr_addr, bool assert)
 		clrbits32(bcr_addr, BIT(CLK_CTL_BCR_BLK_SHFT));
 }
 
+/* Clock Reset Operations */
+void clock_reset(void *cbcr_addr, bool assert)
+{
+	if (assert)
+		setbits32(cbcr_addr, BIT(CLK_CTL_ARES_SHFT));
+	else
+		clrbits32(cbcr_addr, BIT(CLK_CTL_ARES_SHFT));
+}
+
 /* Clock GDSC Operations */
 enum cb_err enable_and_poll_gdsc_status(void *gdscr_addr)
 {
@@ -128,8 +137,15 @@ void clock_configure_dfsr_table(int qup, struct clock_freq_config *clk_cfg,
 	unsigned int idx, s = qup % QUP_WRAP1_S0;
 	uint32_t reg_val;
 
-	qup_clk = qup < QUP_WRAP1_S0 ?
-				&gcc->qup_wrap0_s[s] : &gcc->qup_wrap1_s[s];
+#if QUP_WRAP2_BASE
+	if (qup >= QUP_WRAP2_S0)
+		qup_clk = &gcc->qup_wrap2_s[s];
+	else
+#endif
+	if (qup >= QUP_WRAP1_S0)
+		qup_clk = &gcc->qup_wrap1_s[s];
+	else
+		qup_clk = &gcc->qup_wrap0_s[s];
 
 	clrsetbits32(&qup_clk->dfsr_clk.cmd_dfsr,
 			BIT(CLK_CTL_CMD_RCG_SW_CTL_SHFT),
@@ -259,6 +275,28 @@ enum cb_err zonda_pll_enable(struct alpha_pll_reg_val_config *cfg)
 	}
 
 	setbits32(cfg->reg_user_ctl, PLL_USERCTL_BMSK);
+	setbits32(cfg->reg_mode, BIT(PLL_OUTCTRL_SHFT));
+
+	return CB_SUCCESS;
+}
+
+enum cb_err zondaole_pll_enable(struct alpha_pll_reg_val_config *cfg)
+{
+	setbits32(cfg->reg_mode, BIT(PLL_BYPASSNL_SHFT));
+
+	/*
+	 * H/W requires a 1us delay between disabling the bypass and
+	 * de-asserting the reset.
+	 */
+	udelay(1);
+	setbits32(cfg->reg_mode, BIT(PLL_RESET_SHFT));
+	setbits32(cfg->reg_opmode, PLL_RUN_MODE);
+
+	if (!wait_us(100, read32(cfg->reg_mode) & PLL_LOCK_DET_BMSK)) {
+		printk(BIOS_ERR, "CPU PLL did not lock!\n");
+		return CB_ERR;
+	}
+
 	setbits32(cfg->reg_mode, BIT(PLL_OUTCTRL_SHFT));
 
 	return CB_SUCCESS;

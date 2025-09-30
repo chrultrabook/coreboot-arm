@@ -80,8 +80,8 @@ config SOC_AMD_CEZANNE
 	select SOC_AMD_COMMON_ROMSTAGE_LEGACY_DMA_FIXUP
 	select SSE2
 	select UDK_2017_BINDING
-	select USE_DDR4
-	select USE_LPDDR4
+	select DRAM_SUPPORT_DDR4
+	select DRAM_SUPPORT_LPDDR4
 	select USE_FSP_NOTIFY_PHASE_POST_PCI_ENUM
 	select USE_FSP_NOTIFY_PHASE_READY_TO_BOOT
 	select USE_FSP_NOTIFY_PHASE_END_OF_FIRMWARE
@@ -477,5 +477,12 @@ config RWB_REGION_ONLY
 	  RW-B section.
 
 endif # VBOOT_SLOTS_RW_AB && VBOOT_STARTS_BEFORE_BOOTBLOCK
+
+config SERIRQ_CONTINUOUS_MODE
+	bool
+	default n
+	help
+	  Set this option to y for serial IRQ in continuous mode.
+	  Otherwise it is in quiet mode.
 
 endif # SOC_AMD_CEZANNE

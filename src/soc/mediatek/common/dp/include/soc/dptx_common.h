@@ -3,6 +3,8 @@
 #ifndef SOC_MEDIATEK_COMMON_DP_DPTX_COMMON_H
 #define SOC_MEDIATEK_COMMON_DP_DPTX_COMMON_H
 
+#include <types.h>
+
 #define DP_LANSE_ADJUST_SIZE		2
 #define DPTX_TBC_BUF_READSTARTADRTHRD	0x08
 #define ENABLE_DPTX_EF_MODE		0x1
@@ -66,6 +68,9 @@
 #define DP_AUX_MAX_PAYLOAD_BYTES		16
 
 #define MAX_LANECOUNT				4
+
+#define HPD_WAIT_TIMEOUT_MS			200
+#define WAIT_AUX_READY_TIME_MS			3
 
 enum {
 	DP_LANECOUNT_1	= 0x1,
@@ -213,24 +218,27 @@ struct mtk_dp {
 	bool enabled;
 	bool powered;
 	bool force_max_swing;
+	u8 edp_version;
 };
 
 int mtk_edp_init(struct mtk_dp *mtk_dp, struct edid *edid);
 int mtk_edp_enable(struct mtk_dp *mtk_dp);
 
+void dptx_set_tx_power_con(void);
+void dptx_set_26mhz_clock(void);
+int dptx_set_trainingstart(struct mtk_dp *mtk_dp);
 bool dptx_auxread_dpcd(struct mtk_dp *mtk_dp, u8 cmd, u32 dpcd_addr,
 		       size_t length, u8 *rxbuf);
 bool dptx_auxwrite_dpcd(struct mtk_dp *mtk_dp, u8 cmd, u32 dpcd_addr,
 			size_t length, u8 *data);
 bool dptx_channel_eq_ok(const u8 link_status[DP_LINK_STATUS_SIZE],
 			int lane_count);
-void dptx_check_sinkcap(struct mtk_dp *mtk_dp);
 bool dptx_clock_recovery_ok(const u8 link_status[DP_LINK_STATUS_SIZE],
 			    int lane_count);
 void dptx_init_variable(struct mtk_dp *mtk_dp);
-int dptx_get_edid(struct mtk_dp *mtk_dp, struct edid *out);
 void dptx_link_train_channel_eq_delay(const u8 dpcd[DP_RECEIVER_CAP_SIZE]);
 void dptx_link_train_clock_recovery_delay(const u8 dpcd[DP_RECEIVER_CAP_SIZE]);
+void dptx_power_on(void);
 void dptx_video_config(struct mtk_dp *mtk_dp);
 void dptx_video_enable(struct mtk_dp *mtk_dp, bool enable);
 

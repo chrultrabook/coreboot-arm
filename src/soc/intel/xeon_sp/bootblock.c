@@ -73,7 +73,6 @@ asmlinkage void bootblock_c_entry(uint64_t base_timestamp)
 	 */
 	assembly_timestamp = base_timestamp;
 	bootblock_timestamp = timestamp_get();
-	fast_spi_cache_bios_region();
 
 	bootblock_main_with_basetime(MIN(assembly_timestamp, bootblock_timestamp));
 }

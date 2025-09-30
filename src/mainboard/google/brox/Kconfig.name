@@ -5,11 +5,17 @@ comment "Brox"
 config BOARD_GOOGLE_BROX
 	bool "->  Brox"
 
+config BOARD_GOOGLE_BROX_RTK_EC
+	bool "->  Brox RTK EC"
+
 config BOARD_GOOGLE_BROX_EC_ISH
 	bool "->  Brox EC ISH"
 
 config BOARD_GOOGLE_BROX_TI_PDC
 	bool "->  Brox TI PDC"
+
+config BOARD_GOOGLE_CABOC
+	bool "->  Caboc"
 
 config BOARD_GOOGLE_GREENBAYUPOC
 	bool "->  Greenbayupoc"

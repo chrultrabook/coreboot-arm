@@ -7,6 +7,13 @@ chip soc/intel/alderlake
 
 	register "sagv" = "SaGv_Enabled"
 
+	# Acoustic settings
+	register "acoustic_noise_mitigation" = "1"
+	register "slow_slew_rate[VR_DOMAIN_IA]" = "SLEW_FAST_8"
+	register "slow_slew_rate[VR_DOMAIN_GT]" = "SLEW_FAST_8"
+	register "fast_pkg_c_ramp_disable[VR_DOMAIN_IA]" = "1"
+	register "fast_pkg_c_ramp_disable[VR_DOMAIN_GT]" = "1"
+
 	# SOC Aux orientation override:
 	# This is a bitfield that corresponds to up to 4 TCSS ports.
 	# Bits (0,1) allocated for TCSS Port1 configuration and Bits (2,3)for TCSS Port2.
@@ -240,6 +247,10 @@ chip soc/intel/alderlake
 				register "generic.reset_off_delay_ms" = "2"
 				register "generic.has_power_resource" = "1"
 				register "generic.use_gpio_for_status" = "true"
+				register "generic.property_count" = "1"
+				register "generic.property_list[0].type" = "ACPI_DP_TYPE_REFERENCE"
+				register "generic.property_list[0].name" = ""panel""
+				register "generic.property_list[0].string" = ""\\_SB.PCI0.GFX0.LCD0""
 				register "hid_desc_reg_offset" = "0x1"
 				device i2c 4F on end
 			end

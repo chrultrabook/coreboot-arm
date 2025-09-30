@@ -11,107 +11,130 @@
 /* t: table */
 #define GPIO_CONFIGURE_PADS(t) gpio_configure_pads(t, ARRAY_SIZE(t))
 
-static const struct pad_config hda_enable_pads[] = {
-	/* HDA_BCLK */
+static const struct pad_config i2s_enable_pads[] = {
+	/* I2S_MCLK1_OUT */
+	PAD_CFG_NF(GPP_D09, NONE, DEEP, NF2),
+	/* I2S0_SCLK_HDR */
 	PAD_CFG_NF(GPP_D10, NONE, DEEP, NF1),
-	/* HDA_SYNC */
-	PAD_CFG_NF(GPP_D11, NATIVE, DEEP, NF1),
-	/* HDA_SDO */
-	PAD_CFG_NF(GPP_D12, NATIVE, DEEP, NF1),
-	/* HDA_SDI_0 */
-	PAD_CFG_NF(GPP_D13, NATIVE, DEEP, NF1),
+	/* I2S0_SFRM_HDR */
+	PAD_CFG_NF(GPP_D11, NONE, DEEP, NF1),
+	/* I2S0_TXD_HDR */
+	PAD_CFG_NF(GPP_D12, NONE, DEEP, NF1),
+	/* I2S0_RXD_HDR */
+	PAD_CFG_NF(GPP_D13, NONE, DEEP, NF1),
+	/* I2S1_TXD_HDR */
+	PAD_CFG_NF(GPP_S00, NONE, DEEP, NF1),
+	/* I2S1_RXD_HDR */
+	PAD_CFG_NF(GPP_S01, NONE, DEEP, NF1),
+	/* I2S1_SCLK_HDR */
+	PAD_CFG_NF(GPP_S02, NONE, DEEP, NF1),
+	/* I2S1_SFRM_HDR */
+	PAD_CFG_NF(GPP_S03, NONE, DEEP, NF1),
+	/* I2S2_SCLK_HDR */
+	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF1),
+	/* I2S2_SFRM_HDR */
+	PAD_CFG_NF(GPP_S05, NONE, DEEP, NF1),
+	/* I2S2_TXD_HDR */
+	PAD_NC(GPP_S06, NONE),
+	/* I2S2_RXD_HDR */
+	PAD_NC(GPP_S07, NONE),
 
 	/* DMIC_CLK */
-	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF5),
+	PAD_NC(GPP_D16, NONE),
 	/* DMIC_DATA */
+	PAD_NC(GPP_D17, NONE),
+};
+
+static const struct pad_config hda_enable_pads[] = {
+	/* GPP_D10:     HDA_BCLK (HDR) */
+	PAD_CFG_NF(GPP_D10, NONE, DEEP, NF1),
+	/* GPP_D11:     HDA_SYNC (HDR) */
+	PAD_CFG_NF(GPP_D11, NONE, DEEP, NF1),
+	/* GPP_D12:     HDA_SDO (HDR) */
+	PAD_CFG_NF(GPP_D12, NONE, DEEP, NF1),
+	/* GPP_D13:     HDA_SDI0 (HDR) */
+	PAD_CFG_NF(GPP_D13, NONE, DEEP, NF1),
+	/* GPP_D16:     HDA_RST_N (HDR) */
+	PAD_CFG_NF(GPP_D16, NONE, DEEP, NF1),
+	/* GPP_D17:     HDA_SDI1 (HDR) */
+	PAD_CFG_NF(GPP_D17, NONE, DEEP, NF1),
+	/* GPP_S04:     DMIC0_CLK (HDR) */
+	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF5),
+	/* GPP_S05:     DMIC0_DATA (HDR) */
 	PAD_CFG_NF(GPP_S05, NONE, DEEP, NF5),
-};
-
-static const struct pad_config bt_i2s_enable_pads[] = {
-	/* GPP_V30 : [] ==> BT_I2S_BCLK - SSP2 */
-	PAD_CFG_NF(GPP_VGPIO30, NONE, DEEP, NF3),
-	/* GPP_V31 : [] ==> BT_I2S_SYNC - SSP2 */
-	PAD_CFG_NF(GPP_VGPIO31, NONE, DEEP, NF3),
-	/* GPP_V32 : [] ==> BT_I2S_SDO - SSP2 */
-	PAD_CFG_NF(GPP_VGPIO32, NONE, DEEP, NF3),
-	/* GPP_V33 : [] ==> BT_I2S_SDI - SSP2 */
-	PAD_CFG_NF(GPP_VGPIO33, NONE, DEEP, NF3),
-	/* GPP_V34 : [] ==> SSP_SCLK */
-	PAD_CFG_NF(GPP_VGPIO34, NONE, DEEP, NF1),
-	/* GPP_V35 : [] ==> SSP_SFRM */
-	PAD_CFG_NF(GPP_VGPIO35, NONE, DEEP, NF1),
-	/* GPP_V36 : [] ==> SSP_TXD */
-	PAD_CFG_NF(GPP_VGPIO36, NONE, DEEP, NF1),
-	/* GPP_V37 : [] ==> SSP_RXD */
-	PAD_CFG_NF(GPP_VGPIO37, NONE, DEEP, NF1),
-};
-
-static const struct pad_config bt_i2s_disable_pads[] = {
-	/* GPP_V30 : [] ==> BT_I2S_BCLK */
-	PAD_NC(GPP_VGPIO30, NONE),
-	/* GPP_V31 : [] ==> BT_I2S_SYNC */
-	PAD_NC(GPP_VGPIO31, NONE),
-	/* GPP_V32 : [] ==> BT_I2S_SDO */
-	PAD_NC(GPP_VGPIO32, NONE),
-	/* GPP_V33 : [] ==> BT_I2S_SDI */
-	PAD_NC(GPP_VGPIO33, NONE),
-	/* GPP_V34 : [] ==> SSP2_SCLK */
-	PAD_NC(GPP_VGPIO34, NONE),
-	/* GPP_V35 : [] ==> SSP2_SFRM */
-	PAD_NC(GPP_VGPIO35, NONE),
-	/* GPP_V36 : [] ==> SSP_TXD */
-	PAD_NC(GPP_VGPIO36, NONE),
-	/* GPP_V37 : [] ==> SSP_RXD */
-	PAD_NC(GPP_VGPIO37, NONE),
+	/* GPP_S06:     DMIC1_CLK (HDR) */
+	PAD_CFG_NF(GPP_S06, NONE, DEEP, NF5),
+	/* GPP_S07:     DMIC1_DATA (HDR) */
+	PAD_CFG_NF(GPP_S07, NONE, DEEP, NF5),
 };
 
 static const struct pad_config sndw_alc721_enable_pads[] = {
-	/* SNDW3_CLK   */
+	/* Soundwire GPIO Config */
+	/* GPP_S00:     SNDW3_CLK_CODEC (HDR) */
 	PAD_CFG_NF(GPP_S00, NONE, DEEP, NF1),
-	/* SNDW3_DATA0 */
+	/* GPP_S01:     SNDW3_DATA0_CODEC (HDR) */
 	PAD_CFG_NF(GPP_S01, NONE, DEEP, NF1),
-	/* SNDW3_DATA1 */
+	/* GPP_S02:     SNDW3_DATA1_CODEC (HDR) */
 	PAD_CFG_NF(GPP_S02, NONE, DEEP, NF1),
-	/* SNDW3_DATA2 */
+	/* GPP_S03:     SNDW3_DATA2_CODEC (HDR) */
 	PAD_CFG_NF(GPP_S03, NONE, DEEP, NF1),
-	/* DMIC_CLK_A0 */
+	/* GPP_S04:     DMIC0_CLK (HDR) */
 	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF5),
-	/* DMIC_DATA_0 */
+	/* GPP_S05:     DMIC0_DATA (HDR) */
 	PAD_CFG_NF(GPP_S05, NONE, DEEP, NF5),
-	/* SNDW1_CLK   */
-	PAD_CFG_NF(GPP_S06, NONE, DEEP, NF3),
-	/* SNDW1_DATA  */
-	PAD_CFG_NF(GPP_S07, NONE, DEEP, NF3),
+	/* GPP_S06:     DMIC1_CLK (HDR) */
+	PAD_CFG_NF(GPP_S06, NONE, DEEP, NF5),
+	/* GPP_S07:     DMIC1_DATA (HDR) */
+	PAD_CFG_NF(GPP_S07, NONE, DEEP, NF5),
 };
 
 static const struct pad_config audio_disable_pads[] = {
-	PAD_NC(GPP_S00, NONE),
-	PAD_NC(GPP_S01, NONE),
-	PAD_NC(GPP_S02, NONE),
-	PAD_NC(GPP_S03, NONE),
-	PAD_NC(GPP_S04, NONE),
-	PAD_NC(GPP_S05, NONE),
-	PAD_NC(GPP_S06, NONE),
-	PAD_NC(GPP_S07, NONE),
-	PAD_NC(GPP_D09, NONE),
+	/* GPP_D10:     HDA_BCLK (HDR) */
 	PAD_NC(GPP_D10, NONE),
+	/* GPP_D11:     HDA_SYNC (HDR) */
 	PAD_NC(GPP_D11, NONE),
+	/* GPP_D12:     HDA_SDO (HDR) */
 	PAD_NC(GPP_D12, NONE),
+	/* GPP_D13:     HDA_SDI0 (HDR) */
 	PAD_NC(GPP_D13, NONE),
+	/* GPP_D16:     HDA_RST_N (HDR) */
+	PAD_NC(GPP_D16, NONE),
+	/* GPP_D17:     HDA_SDI1 (HDR) */
+	PAD_NC(GPP_D17, NONE),
+	/* GPP_S00:     SNDW3_CLK_CODEC (HDR) */
+	PAD_NC(GPP_S00, NONE),
+	/* GPP_S01:     SNDW3_DATA0_CODEC (HDR) */
+	PAD_NC(GPP_S01, NONE),
+	/* GPP_S02:     SNDW3_DATA1_CODEC (HDR) */
+	PAD_NC(GPP_S02, NONE),
+	/* GPP_S03:     SNDW3_DATA2_CODEC (HDR) */
+	PAD_NC(GPP_S03, NONE),
+	/* GPP_S04:     DMIC0_CLK (HDR) */
+	PAD_NC(GPP_S04, NONE),
+	/* GPP_S05:     DMIC0_DATA (HDR) */
+	PAD_NC(GPP_S05, NONE),
+	/* GPP_S06:     DMIC1_CLK (HDR) */
+	PAD_NC(GPP_S06, NONE),
+	/* GPP_S07:     DMIC1_DATA (HDR) */
+	PAD_NC(GPP_S07, NONE),
 };
 
-static const struct pad_config x1slot_pads[] = {
-	/* GPP_A08:     X1_PCIE_SLOT_PWR_EN */
-	PAD_CFG_GPO(GPP_A08, 1, PLTRST),
-	/* GPP_D19:     X1_DT_PCIE_RST_N */
-	PAD_CFG_GPO(GPP_D19, 1, PLTRST),
+static const struct pad_config x4slot_pads[] = {
+	/* GPP_F10:     X4_PCIE_SLOT1_PWR_EN */
+	PAD_CFG_GPO(GPP_F10, 1, PLTRST),
+	/* GPP_E03:     X4_DT_PCIE_RST_N */
+	PAD_CFG_GPO(GPP_E03, 1, PLTRST),
+	/* GPP_D03:     X4_SLOT_WAKE_N */
+	PAD_CFG_GPI_SCI_LOW(GPP_D03, NONE, DEEP, LEVEL),
 };
 
-static const struct pad_config x1slot_disable_pads[] = {
-	/* GPP_A08:     X1_PCIE_SLOT_PWR_EN */
-	PAD_CFG_GPO(GPP_A08, 0, PLTRST),
-	/* GPP_D19:     X1_DT_PCIE_RST_N */
-	PAD_NC(GPP_D19, NONE),
+static const struct pad_config x4slot_disable_pads[] = {
+	/* GPP_F10:     X4_PCIE_SLOT1_PWR_EN */
+	PAD_CFG_GPO(GPP_F10, 0, PLTRST),
+	/* GPP_E03:     X4_DT_PCIE_RST_N */
+	PAD_NC(GPP_E03, NONE),
+	/* GPP_D03:     X4_SLOT_WAKE_N */
+	PAD_NC(GPP_D03, NONE),
 };
 
 /*
@@ -164,27 +187,20 @@ static const struct pad_config wwan_disable_pads[] = {
 
 /* Gen4 NVME: at the top M.2 slot */
 static const struct pad_config pre_mem_gen4_ssd_pwr_pads[] = {
-	/* GPP_H18:     EN_PP3300_SSD */
+	/* GPP_H18:     GEN4_SSD_PWREN */
 	PAD_CFG_GPO(GPP_H18, 0, PLTRST),
 };
 
 static const struct pad_config gen4_ssd_pads[] = {
-	/* GPP_B10:     EN_PP3300_SSD */
+	/* GPP_H18:     GEN4_SSD_PWREN */
 	PAD_CFG_GPO(GPP_H18, 1, PLTRST),
-	/* GPP_B09:     SSD_PERST_L */
+	/* GPP_A08:     M2_GEN4_SSD_RESET_N */
 	PAD_CFG_GPO(GPP_A08, 1, PLTRST),
 };
 
 static const struct pad_config ufs_enable_pads[] = {
 	/* GPP_D21:     GPP_D21_UFS_REFCLK */
 	PAD_CFG_NF(GPP_D21, NONE, DEEP, NF1),
-};
-
-static const struct pad_config peg_x4slot_wake_disable_pads[] = {
-	/* GPP_D24:     PEG_SLOT_WAKE_N */
-	PAD_NC(GPP_D24, NONE),
-	/* GPP_D25:     X4_SLOT_WAKE_N */
-	PAD_NC(GPP_D25, NONE),
 };
 
 static const struct pad_config pcie_wlan_enable_pads[] = {
@@ -202,7 +218,11 @@ static const struct pad_config pcie_wlan_disable_pads[] = {
 };
 
 static const struct pad_config cnvi_enable_pads[] = {
-	/* NOTE: IOSSTAGE: 'Ignore' for S0ix */
+	/* GPP_B09:     BT_RF_KILL_N */
+	PAD_CFG_GPO(GPP_B09, 1, DEEP),
+	/* GPP_C10:     WIFI_RF_KILL_N */
+	PAD_CFG_GPO(GPP_C10, 1, DEEP),
+	/* GPP_F00:     M.2_CNV_BRI_DT_BT_UART2_RTS_N */
 	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_F00, NONE, DEEP, NF1),
 	/* GPP_F01:     M.2_CNV_BRI_RSP_BT_UART2_RXD */
 	/* NOTE: IOSSTAGE: 'Ignore' for S0ix */
@@ -219,13 +239,13 @@ static const struct pad_config cnvi_enable_pads[] = {
 	/* GPP_F05:     CRF_CLKREQ_R */
 	/* NOTE: IOSSTAGE: 'Ignore' for S0ix */
 	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_F05, NONE, DEEP, NF3),
-	/* GPP_A16:     BT_RF_KILL_N */
-	PAD_CFG_GPO(GPP_A16, 1, DEEP),
-	/* GPP_A17:     WIFI_RF_KILL_N */
-	PAD_CFG_GPO(GPP_A17, 1, DEEP),
 };
 
 static const struct pad_config cnvi_disable_pads[] = {
+	/* GPP_B09:     BT_RF_KILL_N */
+	PAD_NC(GPP_B09, NONE),
+	/* GPP_C10:     WIFI_RF_KILL_N */
+	PAD_NC(GPP_C10, NONE),
 	/* GPP_F00:     M.2_CNV_BRI_DT_BT_UART2_RTS_N */
 	PAD_NC(GPP_F00, NONE),
 	/* GPP_F01:     M.2_CNV_BRI_RSP_BT_UART2_RXD */
@@ -238,11 +258,6 @@ static const struct pad_config cnvi_disable_pads[] = {
 	PAD_NC(GPP_F04, NONE),
 	/* GPP_F05:     CRF_CLKREQ_R */
 	PAD_NC(GPP_F05, NONE),
-
-	/* GPP_A16:     BT_RF_KILL_N */
-	PAD_NC(GPP_A16, NONE),
-	/* GPP_A17:     WIFI_RF_KILL_N */
-	PAD_NC(GPP_A17, NONE),
 };
 
 static const struct pad_config touchscreen_disable_pads[] = {
@@ -361,56 +376,82 @@ static const struct pad_config thc1_enable_wake[] = {
 };
 
 static const struct pad_config ish_disable_pads[] = {
-	/* GPP_D06:     NC */
+	/* GPP_B05:     C_EC_ISH_ALRT */
+	PAD_NC(GPP_B05, NONE),
+	/* GPP_B07:     SLATEMODE_HALLOUT_SNSR_R */
+	PAD_NC(GPP_B07, NONE),
+	/* GPP_B18:     ISH_I2C2_SDA_SNSR_HDR */
+	PAD_NC(GPP_B18, NONE),
+	/* GPP_B19:     ISH_I2C2_SCL_SNSR_HDR */
+	PAD_NC(GPP_B19, NONE),
+	/* GPP_B22:     ISH_GP_5_SNSR_HDR */
+	PAD_NC(GPP_B22, NONE),
+	/* GPP_B23:     ISH_GP_6_SNSR_HDR */
+	PAD_NC(GPP_B23, NONE),
+	/* GPP_D05:     ISH_UART0_ECAIC_RXD */
+	PAD_NC(GPP_D05, NONE),
+	/* GPP_D06:     ISH_UART0_ECAIC_TXD */
 	PAD_NC(GPP_D06, NONE),
-	/* GPP_E05:     NC */
-	PAD_NC(GPP_E05, NONE),
-	/* GPP_F23:     NC */
+	/* GPP_F23:     SMC_LID / ISH_GP9A*/
 	PAD_NC(GPP_F23, NONE),
 };
 
 static const struct pad_config ish_enable_pads[] = {
-	/* GPP_D06:     ISH_UART0_TXD */
+	/* GPP_B05:     C_EC_ISH_ALRT */
+	PAD_CFG_NF(GPP_B05, NONE, DEEP, NF4),
+	/* GPP_B07:     SLATEMODE_HALLOUT_SNSR_R */
+	PAD_CFG_NF(GPP_B07, NONE, DEEP, NF4),
+	/* GPP_B18:     ISH_I2C2_SDA_SNSR_HDR */
+	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_B18, NONE, DEEP, NF1),
+	/* GPP_B19:     ISH_I2C2_SCL_SNSR_HDR */
+	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_B19, NONE, DEEP, NF1),
+	/* GPP_B22:     ISH_GP_5_SNSR_HDR */
+	PAD_CFG_NF(GPP_B22, NONE, DEEP, NF4),
+	/* GPP_B23:     ISH_GP_6_SNSR_HDR */
+	PAD_CFG_NF(GPP_B23, NONE, DEEP, NF4),
+	/* GPP_D05:     ISH_UART0_ECAIC_RXD */
+	PAD_CFG_NF(GPP_D05, NONE, DEEP, NF2),
+	/* GPP_D06:     ISH_UART0_ECAIC_TXD */
 	PAD_CFG_NF(GPP_D06, NONE, DEEP, NF2),
-	/* GPP_E05:     ISH_GP_7_SNSR_HDR */
-	PAD_CFG_NF(GPP_E05, NONE, DEEP, NF4),
-	/* GPP_F23:     ISH_GP_9A */
+	/* GPP_F23:     SMC_LID / ISH_GP9A*/
 	PAD_CFG_NF(GPP_F23, NONE, DEEP, NF8),
 };
 
 static const struct pad_config fp_disable_pads[] = {
+	/* GPP_E05:     GPP_E05_FPS_PWREN */
+	PAD_NC(GPP_E05, NONE),
+	/* GPP_C15:     FPS_RST_N */
 	PAD_NC(GPP_C15, NONE),
-	/* GPP_D01:     MOD_TCSS1_TYP_A_VBUS_EN */
-	PAD_CFG_GPO(GPP_D01, 1, DEEP),
-	PAD_NC(GPP_E17, NONE),
-	/* FIXME: b/390031369
-	 * use dedicated GPIO PIN for codec enable
-	 * when FPS is enabled.
-	 */
-	/* GPP_E19:     CODEC_EN */
-	PAD_CFG_GPO(GPP_E19, 1, PLTRST),
+	/* GPP_E19:     FPS_INT_N */
+	PAD_NC(GPP_E19, NONE),
+	/* GPP_E20:     FPS_FW_UPDATE */
 	PAD_NC(GPP_E20, NONE),
+	/* GPP_E17:     GPP_E17_GSPI0A_CS0 */
+	PAD_NC(GPP_E17, NONE),
+	/* GPP_F14:     GPP_F14_GPSI0A_MOSI */
 	PAD_NC(GPP_F14, NONE),
+	/* GPP_F15:     GPP_F15_GSPI0A_MISO */
 	PAD_NC(GPP_F15, NONE),
+	/* GPP_F16:     GPP_F16_GSPI0A_CLK */
 	PAD_NC(GPP_F16, NONE),
 };
 
 static const struct pad_config fp_enable_pads[] = {
+	/* GPP_E05:     GPP_E5_FPS_PWREN */
+	PAD_CFG_GPO(GPP_E05, 1, DEEP),
 	/* GPP_C15:     FPS_RST_N */
 	PAD_CFG_GPO_LOCK(GPP_C15, 1, LOCK_CONFIG),
-	/* GPP_D01:     FPS_SOC_INT_L */
-	PAD_CFG_GPI_IRQ_WAKE(GPP_D01, NONE, PWROK, LEVEL, INVERT),
-	/* GPP_E17:     GSPI0A_CS0 */
+	/* GPP_E17:     GPP_E17_GSPI0A_CS0 */
 	PAD_CFG_NF(GPP_E17, NONE, DEEP, NF5),
-	/* GPP_E19:     FPMCU_PWREN */
-	PAD_CFG_GPO(GPP_E19, 1, DEEP),
-	/* GPP_E20:     FPMCU_FW_UPDATE */
+	/* GPP_E19:     FPS_INT_N */
+	PAD_CFG_GPI_IRQ_WAKE(GPP_E19, NONE, PWROK, LEVEL, INVERT),
+	/* GPP_E20:     FPS_FW_UPDATE */
 	PAD_CFG_GPO_LOCK(GPP_E20, 0, LOCK_CONFIG),
-	/* GPP_F14:     GPSI0A_MOSI */
+	/* GPP_F14:     GPP_F14_GPSI0A_MOSI */
 	PAD_CFG_NF(GPP_F14, NONE, DEEP, NF8),
-	/* GPP_F15:     GSPI0A_MISO */
+	/* GPP_F15:     GPP_F15_GSPI0A_MISO */
 	PAD_CFG_NF(GPP_F15, NONE, DEEP, NF8),
-	/* GPP_F16:     GPSI0A_CLK */
+	/* GPP_F16:     GPP_F16_GSPI0A_CLK */
 	PAD_CFG_NF(GPP_F16, NONE, DEEP, NF8),
 };
 
@@ -473,16 +514,13 @@ void fw_config_gpio_padbased_override(struct pad_config *padbased_table)
 
 	if (fw_config_probe(FW_CONFIG(AUDIO, AUDIO_NONE))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, audio_disable_pads);
-		GPIO_PADBASED_OVERRIDE(padbased_table, bt_i2s_disable_pads);
 	} else if (fw_config_probe(FW_CONFIG(AUDIO, AUDIO_ALC721_SNDW))) {
-		printk(BIOS_INFO, "Configure GPIOs for Soundwire audio.\n");
 		GPIO_PADBASED_OVERRIDE(padbased_table, sndw_alc721_enable_pads);
-		printk(BIOS_INFO, "Configure GPIOs for BT offload mode.\n");
-		GPIO_PADBASED_OVERRIDE(padbased_table, bt_i2s_enable_pads);
 	} else if (fw_config_probe(FW_CONFIG(AUDIO, AUDIO_ALC256_HDA))) {
-		printk(BIOS_INFO, "Configure GPIOs for HDA ALC 256 mode.\n");
 		GPIO_PADBASED_OVERRIDE(padbased_table, hda_enable_pads);
-		GPIO_PADBASED_OVERRIDE(padbased_table, bt_i2s_disable_pads);
+	} else if (fw_config_probe(FW_CONFIG(AUDIO, AUDIO_MAX98360_ALC5682I_I2S))) {
+		printk(BIOS_INFO, "Configure GPIOs for I2S MAX98360 ALC5682 audio.\n");
+		GPIO_PADBASED_OVERRIDE(padbased_table, i2s_enable_pads);
 	}
 
 	if (fw_config_probe(FW_CONFIG(WIFI, WIFI_PCIE_6)) ||
@@ -503,9 +541,9 @@ void fw_config_gpio_padbased_override(struct pad_config *padbased_table)
 	}
 
 	if (fw_config_probe(FW_CONFIG(SD, SD_NONE)))
-		GPIO_PADBASED_OVERRIDE(padbased_table, x1slot_disable_pads);
+		GPIO_PADBASED_OVERRIDE(padbased_table, x4slot_disable_pads);
 	else
-		GPIO_PADBASED_OVERRIDE(padbased_table, x1slot_pads);
+		GPIO_PADBASED_OVERRIDE(padbased_table, x4slot_pads);
 
 	if (fw_config_probe(FW_CONFIG(TOUCHPAD, TOUCHPAD_LPSS_I2C))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, touchpad_lpss_i2c_enable_pads);
@@ -527,13 +565,11 @@ void fw_config_gpio_padbased_override(struct pad_config *padbased_table)
 		GPIO_PADBASED_OVERRIDE(padbased_table, touchscreen_disable_pads);
 	}
 
-	if (fw_config_probe(FW_CONFIG(ISH, ISH_DISABLE)))
-		GPIO_PADBASED_OVERRIDE(padbased_table, ish_disable_pads);
-	else
+	if (fw_config_probe(FW_CONFIG(ISH, ISH_ENABLE))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, ish_enable_pads);
-
-	/* NOTE: disable PEG (x8 slot) and x4 slot wake for now */
-	GPIO_PADBASED_OVERRIDE(padbased_table, peg_x4slot_wake_disable_pads);
+	} else {
+		GPIO_PADBASED_OVERRIDE(padbased_table, ish_disable_pads);
+	}
 
 	if (fw_config_probe(FW_CONFIG(FP, FP_PRESENT))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, fp_enable_pads);

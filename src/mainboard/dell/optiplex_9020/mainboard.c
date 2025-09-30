@@ -4,8 +4,8 @@
 #include <cpu/x86/msr.h>
 #include <device/device.h>
 #include <drivers/intel/gma/int15.h>
+#include <gpio.h>
 #include <option.h>
-#include <southbridge/intel/common/gpio.h>
 #include "sch5555_ec.h"
 
 static void mainboard_enable(struct device *dev)
@@ -269,8 +269,8 @@ static uint8_t get_chassis_type(void)
 	uint8_t gpio_chassis_type;
 
 	// Read chassis type from GPIO
-	gpio_chassis_type = get_gpio(70) << 3 | get_gpio(38) << 2 |
-			    get_gpio(17) << 1 | get_gpio(1);
+	const gpio_t chassis_id_pins[] = {1, 17, 38, 70};
+	gpio_chassis_type = gpio_base2_value(chassis_id_pins, ARRAY_SIZE(chassis_id_pins));
 
 	printk(BIOS_DEBUG, "GPIO chassis type = %#x\n", gpio_chassis_type);
 

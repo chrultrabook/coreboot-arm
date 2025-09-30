@@ -92,12 +92,60 @@ static enum mbox_p2c_status find_psp_spi_flash_device_region(uint64_t target_nv_
 	return MBOX_PSP_SUCCESS;
 }
 
+/*
+ * Returns true when the SPI flash is busy, the SPI controller is busy or the SPI
+ * MMIO register access is blocked by ring0. When the SPI flash is busy all
+ * operations, including reading, would fail.
+ * Thus even memory mapped structures like FMAP would not be accessible
+ * from memory mapped SPI flash (ROM2/ROM3). Caller must return MBOX_PSP_SPI_BUSY
+ * to PSP when this function returns true.
+ */
 static bool spi_controller_busy(void)
 {
-	const bool busy = (spi_read8(SPI_MISC_CNTRL) & SPI_SEMAPHORE_DRIVER_LOCKED);
+	bool busy;
+
+	/* When the firmware is using the SPI controller stop here */
+	busy = (spi_read8(SPI_MISC_CNTRL) & SPI_SEMAPHORE_BIOS_LOCKED);
+	if (busy) {
+		printk(BIOS_NOTICE, "PSP: SPI controller blocked by coreboot (ring 0)\n");
+		return true;
+	}
+
+	/*
+	 * When ring0 is operating on the SPI flash and the controller is
+	 * busy, don't interrupt ongoing transfer.
+	 */
+	if (spi_read32(SPI_STATUS) & SPI_BUSY)
+		busy = true;
+
+	/*
+	 * Even when the SPI controller is not busy, the SPI flash
+	 * might be busy. When that's the case reading from the
+	 * memory mapped SPI flash doesn't work and returns all 0xffs.
+	 * Thus check if the SPI flash is busy.
+	 */
+	if (CONFIG(SPI_FLASH) && !busy) {
+		const struct spi_flash *spi_flash_dev;
+		uint8_t sr1 = 0;
+
+		spi_flash_dev = boot_device_spi_flash();
+		assert(spi_flash_dev);
+		if (spi_flash_dev) {
+			/* Read Status Register 1 */
+			if (spi_flash_status(spi_flash_dev, &sr1) < 0)
+				busy = true;
+			else if (sr1 & BIT(0))
+				busy = true;
+		}
+	}
+
+	if (CONFIG(SOC_AMD_PICASSO) && !busy) {
+		// Only implemented on Picasso and Raven Ridge
+		busy = (spi_read8(SPI_MISC_CNTRL) & SPI_SEMAPHORE_DRIVER_LOCKED);
+	}
 
 	if (busy)
-		printk(BIOS_NOTICE, "PSP: SPI controller busy\n");
+		printk(BIOS_NOTICE, "PSP: SPI controller or SPI flash busy\n");
 
 	return busy;
 }

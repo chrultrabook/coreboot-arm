@@ -12,16 +12,6 @@
 DEFINE_BIT(SAMPL_CK_POL, 0)
 DEFINE_BITFIELD(SAMPL_CK_DLY, 3, 1)
 
-/* PMIF, SPI_MODE_CTRL */
-DEFINE_BIT(SPI_MODE_CTRL, 7)
-DEFINE_BIT(SRVOL_EN, 11)
-DEFINE_BIT(SPI_MODE_EXT_CMD, 12)
-DEFINE_BIT(SPI_EINT_MODE_GATING_EN, 13)
-
-/* PMIF, SLEEP_PROTECTION_CTRL */
-DEFINE_BITFIELD(SPM_SLEEP_REQ_SEL, 1, 0)
-DEFINE_BITFIELD(SCP_SLEEP_REQ_SEL, 10, 9)
-
 __weak void pmif_spmi_config(struct pmif *arb)
 {
 	/* Do nothing. */
@@ -97,20 +87,6 @@ static int spmi_mst_init(struct pmif *pmif_arb)
 	return 0;
 }
 
-static void pmif_spmi_force_normal_mode(struct pmif *arb)
-{
-	/* listen srclken_0 only for entering normal or sleep mode */
-	SET32_BITFIELDS(&arb->mtk_pmif->spi_mode_ctrl,
-			SPI_MODE_CTRL, 0,
-			SRVOL_EN, 0,
-			SPI_MODE_EXT_CMD, 1,
-			SPI_EINT_MODE_GATING_EN, 1);
-
-	/* enable spm/scp sleep request */
-	SET32_BITFIELDS(&arb->mtk_pmif->sleep_protection_ctrl, SPM_SLEEP_REQ_SEL, 0,
-			SCP_SLEEP_REQ_SEL, 0);
-}
-
 static void pmif_spmi_enable_swinf(struct pmif *arb)
 {
 	write32(&arb->mtk_pmif->inf_en, PMIF_SPMI_SW_CHAN);
@@ -128,14 +104,16 @@ static void pmif_spmi_enable(struct pmif *arb)
 	pmif_spmi_config(arb);
 
 	/*
-	 * set bytecnt max limitation.
-	 * hw bytecnt indicate when we set 0, it can send 1 byte;
-	 * set 1, it can send 2 byte.
+	 * Set max bytecnt. For each 32-bit reg, 4 bits indicate one channel.
+	 * 0x0 means max bytecnt = 1.
+	 * 0x1 means max bytecnt = 2.
+	 * Here we set max bytecnt to 2 for all channels.
 	 */
-	write32(&arb->mtk_pmif->inf_max_bytecnt_per_0, 0);
-	write32(&arb->mtk_pmif->inf_max_bytecnt_per_1, 0);
-	write32(&arb->mtk_pmif->inf_max_bytecnt_per_2, 0);
-	write32(&arb->mtk_pmif->inf_max_bytecnt_per_3, 0);
+
+	write32(&arb->mtk_pmif->inf_max_bytecnt_per_0, 0x11111111);
+	write32(&arb->mtk_pmif->inf_max_bytecnt_per_1, 0x11111111);
+	write32(&arb->mtk_pmif->inf_max_bytecnt_per_2, 0x11111111);
+	write32(&arb->mtk_pmif->inf_max_bytecnt_per_3, 0x11111111);
 
 	/* Add latency limitation */
 	write32(&arb->mtk_pmif->lat_cnter_en, PMIF_SPMI_INF);

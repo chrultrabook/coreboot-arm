@@ -27,13 +27,13 @@ static const struct pad_config override_gpio_table[] = {
 	/* A11 : EN_SPK_PA ==> NC */
 	PAD_NC(GPP_A11, NONE),
 	/* A12 : SOC_PEN_DETECT_ODL */
-	PAD_CFG_GPI_SCI_HIGH(GPP_A12, NONE, PLTRST, EDGE_BOTH),
+	PAD_CFG_GPI_SCI_HIGH(GPP_A12, NONE, PLTRST, EDGE_SINGLE),
 	/* A13 : GPP_A13 ==> GSC_SOC_INT_ODL */
 	PAD_CFG_GPI_APIC(GPP_A13, NONE, PLTRST, LEVEL, INVERT),
-	/* A14 : USB_OC1# */
-	PAD_CFG_NF(GPP_A14, NONE, DEEP, NF1),
-	/* A15 : USB_OC2# */
-	PAD_CFG_NF(GPP_A15, NONE, DEEP, NF1),
+	/* A14 : USB_OC1# ==> NC */
+	PAD_NC(GPP_A14, NONE),
+	/* A15 : USB_OC2# ==> NC */
+	PAD_NC(GPP_A15, NONE),
 	/* A16 : USB_OC3# ==> NC */
 	PAD_NC_LOCK(GPP_A16, NONE, LOCK_CONFIG),
 	/* A17 : NC */
@@ -56,14 +56,14 @@ static const struct pad_config override_gpio_table[] = {
 	PAD_CFG_NF(GPP_B1, NONE, DEEP, NF1),
 	/* B2  : NC */
 	PAD_NC(GPP_B2, NONE),
-	/* B3  : CPU_GP2 ==> GYRO_SENSOR_INT */
-	PAD_CFG_GPI_APIC(GPP_B3, NONE, PWROK, LEVEL, INVERT),
-	/* B4  : PROC_GP3 ==> ACC_SENSOR_INT */
-	PAD_CFG_GPI_APIC(GPP_B4, NONE, PWROK, LEVEL, INVERT),
-	/* B5  : GPP_B5 ==> ISH_I2C0_SENSOR_SCL */
-	PAD_CFG_NF(GPP_B5, NONE, DEEP, NF1),
-	/* B6  : GPP_B6 ==> ISH_I2C0_SENSOR_SDA */
-	PAD_CFG_NF(GPP_B6, NONE, DEEP, NF1),
+	/* B3  : ISH_IMU_INT_L */
+	PAD_CFG_NF(GPP_B3, NONE, DEEP, NF4),
+	/* B4  : ISH_ACC_INT_L */
+	PAD_CFG_NF(GPP_B4, NONE, DEEP, NF4),
+	/* B5  : EC_I2C_SENSOR_SDA_SOC */
+	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_B5, NONE, DEEP, NF1),
+	/* B6  : EC_I2C_SENSOR_SCL_SOC */
+	PAD_CFG_NF_IOSTANDBY_IGNORE(GPP_B6, NONE, DEEP, NF1),
 	/* B7  : GPP_B7 ==> NC */
 	PAD_CFG_NF(GPP_B7, NONE, DEEP, NF2),
 	/* B8  : WWAN_SAR_DETECT_2_ODL */
@@ -118,8 +118,8 @@ static const struct pad_config override_gpio_table[] = {
 	PAD_CFG_GPO_LOCK(GPP_D0, 0, LOCK_CONFIG),
 	/* D1  : ISH_GP1 ==> SOC_GSEN2_INT# */
 	PAD_CFG_NF(GPP_D1, NONE, DEEP, NF1),
-	/* D2  : NC */
-	PAD_NC_LOCK(GPP_D2, NONE, LOCK_CONFIG),
+	/* D2  : NC => EN_FP_PWR */
+	PAD_CFG_GPO_LOCK(GPP_D2, 0, LOCK_CONFIG),
 	/* D3  : ISH_GP3 ==> WCAM_RST_L */
 	PAD_CFG_GPO_LOCK(GPP_D3, 0, LOCK_CONFIG),
 	/* D4  : IMGCLKOUT0 ==> BT_DISABLE_L */
@@ -130,8 +130,8 @@ static const struct pad_config override_gpio_table[] = {
 	PAD_CFG_GPO(GPP_D6, 1, DEEP),
 	/* D7  : SRCCLKREQ2# ==> WLAN_CLKREQ_ODL */
 	PAD_CFG_NF(GPP_D7, NONE, DEEP, NF1),
-	/* D8  : SRCCLKREQ3# ==> NC */
-	PAD_NC_LOCK(GPP_D8, NONE, LOCK_CONFIG),
+	/* D8  : SRCCLKREQ3# ==> SD_CLKREQ_ODL */
+	PAD_CFG_NF(GPP_D8, NONE, DEEP, NF1),
 	/* D9  : NC */
 	PAD_NC_LOCK(GPP_D9, NONE, LOCK_CONFIG),
 	/* D10 : ISH_SPI_CLK ==> GPP_D10_STRAP */
@@ -145,7 +145,7 @@ static const struct pad_config override_gpio_table[] = {
 	/* D14 : UART0_ISH_TX_DBG_RX */
 	PAD_CFG_NF(GPP_D14, NONE, DEEP, NF1),
 	/* D15 : ISH_UART0_RTS# ==> EN_PP2800_WCAM_X */
-	PAD_CFG_GPO_LOCK(GPP_D15, 1, LOCK_CONFIG),
+	PAD_CFG_GPO_LOCK(GPP_D15, 0, LOCK_CONFIG),
 	/* D16 : ISH_UART0_CTS# ==> EN_PP1800_PP1200_WCAM_X */
 	PAD_CFG_GPO_LOCK(GPP_D16, 1, LOCK_CONFIG),
 	/* D17  : NC ==> UART_AP_RX_FP_TX */
@@ -172,8 +172,8 @@ static const struct pad_config override_gpio_table[] = {
 	PAD_CFG_GPO_LOCK(GPP_E7, 1, LOCK_CONFIG),
 	/* E8  : GPP_E8 ==> WLAN_DISABLE_L */
 	PAD_CFG_GPO(GPP_E8, 1, DEEP),
-	/* E9  : NC */
-	PAD_NC_LOCK(GPP_E9, NONE, LOCK_CONFIG),
+	/* E9  : NC ==> DIMM_CHANNEL_SELECT */
+	PAD_CFG_GPI_LOCK(GPP_E9, DN_20K, LOCK_CONFIG),
 	/* E10 : EN_PP3300_WLAN_X */
 	PAD_CFG_GPO(GPP_E10, 0, DEEP),
 	/* E11 : TCHSCR_INT_ODL */
@@ -274,10 +274,6 @@ static const struct pad_config override_gpio_table[] = {
 	PAD_CFG_NF(GPP_H10, NONE, DEEP, NF2),
 	/* H11 : UART0_TXD ==> UART_SOC_TX_DBG_RX */
 	PAD_CFG_NF(GPP_H11, NONE, DEEP, NF2),
-	/* H12 : GPP_H12 ==> NC */
-	PAD_NC_LOCK(GPP_H12, NONE, LOCK_CONFIG),
-	/* H13 : GPP_H13 ==> NC */
-	PAD_NC_LOCK(GPP_H13, NONE, LOCK_CONFIG),
 	/* H14 : Not available */
 	PAD_NC(GPP_H14, NONE),
 	/* H15 : DDPB_CTRLCLK ==> HDMI_DDC_SCL */
@@ -440,9 +436,11 @@ static const struct pad_config early_gpio_table[] = {
 	 * later on in ramstage. Since reset signal is asserted in bootblock, it results in
 	 * FPMCU not working after a S3 resume. This is a known issue.
 	 */
-	 PAD_CFG_GPO(GPP_E7, 0, DEEP),
-	 /* D2  : ISH_GP2 ==> EN_FP_PWR */
-	 PAD_CFG_GPO(GPP_D2, 1, DEEP),
+	PAD_CFG_GPO(GPP_E7, 0, DEEP),
+	/* D2  : ISH_GP2 ==> EN_FP_PWR */
+	PAD_CFG_GPO(GPP_D2, 1, DEEP),
+	/* E9  : DIMM_CHANNEL_SELECT */
+	PAD_CFG_GPI_LOCK(GPP_E9, DN_20K, LOCK_CONFIG),
 	/* E17 : WWAN_RST_L */
 	PAD_CFG_GPO(GPP_E17, 0, DEEP),
 	/* H4  : I2C0_SDA ==> SOC_I2C_GSC_SDA */
@@ -453,6 +451,10 @@ static const struct pad_config early_gpio_table[] = {
 	PAD_CFG_NF(GPP_H10, NONE, DEEP, NF2),
 	/* H11 : UART0_TXD ==> UART_SOC_TX_DBG_RX */
 	PAD_CFG_NF(GPP_H11, NONE, DEEP, NF2),
+	/* H12 : UART0_RTS# ==> SD_PERST_L */
+	PAD_CFG_GPO(GPP_H12, 0, DEEP),
+	/* H13 : UART0_CTS# ==> EN_PP3300_SD_X */
+	PAD_CFG_GPO(GPP_H13, 1, DEEP),
 };
 
 /* Pad configuration in romstage for Sundance */
@@ -475,6 +477,8 @@ static const struct pad_config romstage_gpio_table[] = {
 	 PAD_CFG_GPO(GPP_E7, 0, DEEP),
 	 /* D2  : ISH_GP2 ==> EN_FP_PWR */
 	 PAD_CFG_GPO(GPP_D2, 0, DEEP),
+	/* H12 : UART0_RTS# ==> SD_PERST_L */
+	PAD_CFG_GPO(GPP_H12, 1, DEEP),
 };
 
 const struct pad_config *variant_gpio_override_table(size_t *num)

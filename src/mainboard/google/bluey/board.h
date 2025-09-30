@@ -10,6 +10,9 @@
 #define GSC_AP_INT(x)		GPIO(x)
 #define GPIO_GSC_AP_INT		GSC_AP_INT(CONFIG_MAINBOARD_GPIO_PIN_FOR_GSC_AP_INTERRUPT)
 
+#define TP_POWER_GPIO(x)	GPIO(x)
+#define GPIO_TP_POWER_EN	TP_POWER_GPIO(CONFIG_MAINBOARD_GPIO_PIN_FOR_TOUCHPAD_POWER)
+
 /* Fingerprint-specific GPIOs. Only for fingerprint-enabled devices. */
 #if CONFIG(MAINBOARD_HAS_FINGERPRINT)
 #define GPIO_FP_RST_L		GPIO(25)
@@ -38,5 +41,7 @@
 #endif
 
 void setup_chromeos_gpios(void);
+void enable_slow_battery_charging(void);
+void disable_slow_battery_charging(void);
 
 #endif /* MAINBOARD_GOOGLE_BLUEY_BOARD_H */

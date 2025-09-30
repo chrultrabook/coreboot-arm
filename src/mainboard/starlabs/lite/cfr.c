@@ -1,14 +1,10 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
 #include <boot/coreboot_tables.h>
-#include <commonlib/coreboot_tables.h>
 #include <console/cfr.h>
 #include <drivers/option/cfr_frontend.h>
 #include <ec/starlabs/merlin/cfr.h>
-#include <inttypes.h>
-#include <intelblocks/pcie_rp.h>
-#include <string.h>
-#include <types.h>
+#include <intelblocks/cfr.h>
 #include <variants.h>
 
 static const struct sm_object card_reader = SM_DECLARE_BOOL({
@@ -26,13 +22,6 @@ static const struct sm_object fast_charge = SM_DECLARE_BOOL({
 	.default_value	= false,
 });
 #endif
-
-static const struct sm_object power_on_after_fail = SM_DECLARE_BOOL({
-	.opt_name	= "power_on_after_fail",
-	.ui_name	= "Power on after failure",
-	.ui_helptext	= "Automatically turn on after a power failure",
-	.default_value	= false,
-});
 
 static const struct sm_object power_profile = SM_DECLARE_ENUM({
 	.opt_name	= "power_profile",
@@ -74,6 +63,16 @@ static const struct sm_object vtd = SM_DECLARE_BOOL({
 	.default_value	= true,
 });
 
+static const struct sm_object s0ix_enable = SM_DECLARE_BOOL({
+	.opt_name	= "s0ix_enable",
+	.ui_name	= "Modern Standby (S0ix)",
+	.ui_helptext	= "Enabled: Use S0ix for device sleep.\n"
+			  "Disabled: Use ACPI S3 for device sleep.\n"
+			  "Requires Intel ME to be enabled.\n"
+			  "Recommended: Enabled when booting Windows, disabled otherwise.",
+	.default_value	= false,
+});
+
 static struct sm_obj_form performance = {
 	.ui_name = "Performance",
 	.obj_list = (const struct sm_object *[]) {
@@ -85,6 +84,7 @@ static struct sm_obj_form performance = {
 static struct sm_obj_form processor = {
 	.ui_name = "Processor",
 	.obj_list = (const struct sm_object *[]) {
+		&s0ix_enable,
 		&vtd,
 		NULL
 	},
@@ -96,7 +96,7 @@ static struct sm_obj_form power = {
 		#if CONFIG(EC_STARLABS_FAST_CHARGE)
 		&fast_charge,
 		#endif
-		&power_on_after_fail,
+		&power_on_after_fail_bool,
 		NULL
 	},
 };

@@ -107,7 +107,7 @@ void dptx_hal_bypassmsa_en(struct mtk_dp *mtk_dp, bool enable)
 
 void dptx_hal_set_msa(struct mtk_dp *mtk_dp)
 {
-	u32 va, vsync, vbp, vfp, vtotal, ha, hsync, hbp, hfp, htotal;
+	u32 va, vsync, vbp, vfp, vtotal, ha, hsync, hbp, hfp, htotal, val;
 	struct edid *edid = mtk_dp->edid;
 
 	va = edid->mode.va;
@@ -150,13 +150,15 @@ void dptx_hal_set_msa(struct mtk_dp *mtk_dp)
 	DP_WRITE2BYTE(mtk_dp, REG_3154_DP_ENCODER0_P0, htotal);
 	DP_WRITE2BYTE(mtk_dp, REG_3158_DP_ENCODER0_P0, hfp);
 	DP_WRITE2BYTE(mtk_dp, REG_315C_DP_ENCODER0_P0, hsync);
-	DP_WRITE2BYTE(mtk_dp, REG_3160_DP_ENCODER0_P0, hsync + hbp);
+	val = mtk_dp->edp_version == 1 ? hsync + hbp : hsync + hbp + hfp;
+	DP_WRITE2BYTE(mtk_dp, REG_3160_DP_ENCODER0_P0, val);
 	DP_WRITE2BYTE(mtk_dp, REG_3164_DP_ENCODER0_P0, ha);
 	/* vertical */
 	DP_WRITE2BYTE(mtk_dp, REG_3168_DP_ENCODER0_P0, vtotal);
 	DP_WRITE2BYTE(mtk_dp, REG_316C_DP_ENCODER0_P0, vfp);
 	DP_WRITE2BYTE(mtk_dp, REG_3170_DP_ENCODER0_P0, vsync);
-	DP_WRITE2BYTE(mtk_dp, REG_3174_DP_ENCODER0_P0, vsync + vbp);
+	val = mtk_dp->edp_version == 1 ? vsync + vbp : vsync + vbp + vfp;
+	DP_WRITE2BYTE(mtk_dp, REG_3174_DP_ENCODER0_P0, val);
 	DP_WRITE2BYTE(mtk_dp, REG_3178_DP_ENCODER0_P0, va);
 
 	printk(BIOS_INFO, "MSA:Htt(%d), Vtt(%d), Hact(%d), Vact(%d), FPS(%d)\n",
@@ -561,3 +563,5 @@ void dptx_hal_analog_power_en(struct mtk_dp *mtk_dp, bool enable)
 		DP_WRITE2BYTE(mtk_dp, 0x0038, 0x555);
 	}
 }
+
+__weak void dptx_hal_phy_init(struct mtk_dp *mtk_dp) { /* do nothing */ }

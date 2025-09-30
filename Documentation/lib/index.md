@@ -11,4 +11,7 @@ ABI data consumption <abi-data-consumption.md>
 Timestamps <timestamp.md>
 Firmware Configuration Interface <fw_config.md>
 Relocatable Modules <rmodules.md>
+Timers, Stopwatch, and Delays <stopwatch.md>
+Threads <threads.md>
+Ramstage Bootstates & Bootstate Callbacks <ramstage_bootstates.md>
 ```

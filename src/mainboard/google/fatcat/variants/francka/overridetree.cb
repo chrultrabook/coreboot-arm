@@ -8,6 +8,7 @@ fw_config
 		option AUDIO_ALC721_SNDW		1
 		option AUDIO_CS42L43_CS35L56_SNDW	2
 		option AUDIO_ALC722_ALC1320_SNDW	3
+		option AUDIO_UNKNOWN		7
 	end
 	field BRIDGE 6 7
 		option BRIDGE_HAYDEN		0
@@ -78,7 +79,8 @@ chip soc/intel/pantherlake
 	#| I2C4              | Touchscreen, Touchpad     |
 	#+-------------------+---------------------------+
 	register "common_soc_config" = "{
-		.logo_valignment = FW_SPLASH_VALIGNMENT_MIDDLE,
+		/* Render OEM footer logo 100px above from the edge */
+		.logo_bottom_margin = 100,
 		.chipset_lockdown = CHIPSET_LOCKDOWN_COREBOOT,
 		.i2c[1] = {
 			.early_init = 1,
@@ -207,10 +209,11 @@ chip soc/intel/pantherlake
 				register "generic.irq" = "ACPI_IRQ_LEVEL_LOW(GPP_E01_IRQ)"
 				register "generic.detect" = "1"
 				register "generic.reset_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_B08)"
-				register "generic.reset_delay_ms" = "10"
+				register "generic.reset_delay_ms" = "100"
 				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_B18)"
 				register "generic.enable_delay_ms" = "12"
 				register "generic.has_power_resource" = "1"
+				register "generic.use_gpio_for_status" = "true"
 				register "hid_desc_reg_offset" = "0x01"
 				device i2c 41 on end
 			end
@@ -275,6 +278,10 @@ chip soc/intel/pantherlake
 
 		device ref smbus on end
 		device ref hda on
+			probe AUDIO AUDIO_ALC256M_CG_HDA
+			probe AUDIO AUDIO_ALC721_SNDW
+			probe AUDIO AUDIO_CS42L43_CS35L56_SNDW
+			probe AUDIO AUDIO_ALC722_ALC1320_SNDW
 			chip drivers/sof
 				register "spkr_tplg" = "max98360a"
 				register "jack_tplg" = "rt5682"
@@ -290,9 +297,41 @@ chip soc/intel/pantherlake
 						register "alc711_address.version" = "SOUNDWIRE_VERSION_1_2"
 						register "alc711_address.class" = "MIPI_CLASS_SDCA"
 						register "alc711_address.part_id" = "MIPI_DEV_ID_REALTEK_ALC721"
+						register "disable_clkstop_sm_support" = "true"
 						# SoundWire Link 0 ID 0
 						device generic 0.0 on
 							probe AUDIO AUDIO_ALC721_SNDW
+						end
+					end
+					chip drivers/soundwire/alc711
+						register "desc" = ""Headset Codec""
+						register "alc711_address.version" = "SOUNDWIRE_VERSION_1_2"
+						register "alc711_address.class" = "MIPI_CLASS_SDCA"
+						register "alc711_address.part_id" = "MIPI_DEV_ID_REALTEK_ALC722"
+						register "disable_clkstop_sm_support" = "true"
+						# SoundWire Link 0 ID 0
+						device generic 0.0 on
+							probe AUDIO AUDIO_ALC722_ALC1320_SNDW
+						end
+					end
+					chip drivers/soundwire/alc1320
+						register "desc" = ""Speaker Amp""
+						register "alc1320_address.version" = "SOUNDWIRE_VERSION_1_2"
+						register "alc1320_address.class" = "MIPI_CLASS_SDCA"
+						register "alc1320_address.part_id" = "MIPI_DEV_ID_REALTEK_ALC1320"
+						 # SoundWire Link 2 ID 0
+						device generic 2.0 on
+							probe AUDIO AUDIO_ALC722_ALC1320_SNDW
+						end
+					end
+					chip drivers/soundwire/alc1320
+						register "desc" = ""Speaker Amp""
+						register "alc1320_address.version" = "SOUNDWIRE_VERSION_1_2"
+						register "alc1320_address.class" = "MIPI_CLASS_SDCA"
+						register "alc1320_address.part_id" = "MIPI_DEV_ID_REALTEK_ALC1320"
+						 # SoundWire Link 3 ID 0
+						device generic 3.0 on
+							probe AUDIO AUDIO_ALC722_ALC1320_SNDW
 						end
 					end
 				end

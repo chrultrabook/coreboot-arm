@@ -2,33 +2,151 @@
 
 #include <memlayout.h>
 #include <arch/header.ld>
+#include <soc/memlayout.h>
 
-/* Copied from Qualcomm previous generation SoC SC7280 and need cleanup */
 
-/* SYSTEM_IMEM : 0x14680000 - 0x146AB000 */
-#define SSRAM_START(addr) REGION_START(ssram, addr)
-#define SSRAM_END(addr) REGION_END(ssram, addr)
-
-/* BOOT_IMEM   : 0x14800000 - 0x14980000 */
-#define BSRAM_START(addr) REGION_START(bsram, addr)
-#define BSRAM_END(addr) REGION_END(bsram, addr)
-
-/* AOP : 0x0B000000 - 0x0B100000 */
-#define AOPSRAM_START(addr) REGION_START(aopsram, addr)
-#define AOPSRAM_END(addr) REGION_END(aopsram, addr)
+/*
+ * The linker script below configures the memory layout for the Qualcomm X1P42100 SoC.
+ *
+ * The memory map and addressing scheme are implemented according to the official Qualcomm
+ * Hardware Reference Document (HRD) for this specific SoC.
+ *
+ * 0x10000000000 +----------------------------------------------------------+ <--------------
+ *               |                      dram_space_2                        | DRAM Space 2  ^
+ * 0x8800000000  +----------------------------------------------------------+ <---------    |
+ *               |         ... (Memory not mapped: Unavailable) ...         |  XXXXXXXXX    |
+ * 0x1000000000  +----------------------------------------------------------+ <---------    |
+ *               |                      dram_space_1                        | DRAM Space 1  |
+ * 0x880000000   +----------------------------------------------------------+ <---------    |
+ *               |         ... (Memory not mapped: Unavailable) ...         |  XXXXXXXXX    |
+ * 0x100000000   +----------------------------------------------------------+ <---------    |
+ *               |                 dram_smem (Shared Memory)                |      ^        |
+ * 0xFF800000    +----------------------------------------------------------+      |        |
+ *               |                        CBMEM                             |      |        |
+ *               +----------------------------------------------------------+      |        |
+ *               |                ... Usable memory ...                     |      |        |
+ * 0xD8600000    +----------------------------------------------------------+      |        |
+ *               |                 BL31 (ARM Trusted Firmware)              |      |        |
+ * 0xD856A000    +----------------------------------------------------------+      |        |
+ *               |               dram_tz_rem (TrustZone Remainder)          |      |        |
+ * 0xD81D6000    +----------------------------------------------------------+      |        |
+ *               |                  dram_tz (TrustZone)                     |      |        |
+ * 0xD8000000    +----------------------------------------------------------+      |      DRAM
+ *               |               ... Usable memory ...                      |      |        |
+ * 0xD7800000    +----------------------------------------------------------+      |        |
+ *               |                 Linux Kernel Reserve                     |      |        |
+ * 0xC7800000    +----------------------------------------------------------+      |        |
+ *               |                ... Usable memory ...                     |      |        |
+ * 0xA1800000    +----------------------------------------------------------+      |        |
+ *               |                      RAMSTAGE                            | DRAM Space 0  |
+ * 0xA0800000    +----------------------------------------------------------+      |        |
+ *               |                 POSTRAM_CBFS_CACHE                       |      |        |
+ * 0x9F800000    +----------------------------------------------------------+      |        |
+ *               |                ... Usable memory ...                     |      |        |
+ * 0x91380000    +----------------------------------------------------------+      |        |
+ *               |                       dram_aop                           |      |        |
+ * 0x81C00000    +----------------------------------------------------------+      |        |
+ *               |                     dram_ramdump                         |      |        |
+ * 0x81A00000    +----------------------------------------------------------+      |        |
+ *               |                ... Usable memory ...                     |      |        |
+ * 0x815A0000    +----------------------------------------------------------+      |        |
+ *               |                      dram_cpucp                          |      |        |
+ * 0x80A00000    +----------------------------------------------------------+      |        |
+ *               |                ... Usable memory ...                     |      v        v
+ * 0x80000000    +----------------------------------------------------------+ <--------------
+ *               |         ... (Memory not mapped: Unavailable) ...         | XXXXXXXXX
+ * 0x24060000    +----------------------------------------------------------+ <---------
+ *               |                         shrm                             |    SHRM
+ * 0x24040000    +----------------------------------------------------------+ <---------
+ *               |         ... (Memory not mapped: Unavailable) ...         | XXXXXXXXX
+ * 0x14A80000    +----------------------------------------------------------+ <---------
+ *               |                     debug_policy                         |      ^
+ * 0x14A7F000    +----------------------------------------------------------+      |
+ *               |                    auth_metadata                         |      |
+ * 0x14A7D000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x14A59000    +----------------------------------------------------------+      |
+ *               |         OVERLAP_DECOMPRESSOR_VERSTAGE_ROMSTAGE           |      |
+ * 0x14A38000    +----------------------------------------------------------+      |
+ *               |                 PRERAM_CBMEM_CONSOLE                     |      |
+ * 0x14A30000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x14A1A000    +----------------------------------------------------------+      |
+ *               |                        CPR                               |      |
+ * 0x14A17000    +----------------------------------------------------------+      |
+ *               |                       qclib                              |      |
+ * 0x14897000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x1488C000    +----------------------------------------------------------+      |
+ *               |                    qc_blob_meta                          |      |
+ * 0x14888000    +----------------------------------------------------------+      |
+ *               |                    ddr_training                          |      |
+ * 0x14878000    +----------------------------------------------------------+      |
+ *               |               dtb (Device Tree Blob)                     |      |
+ * 0x14870000    +----------------------------------------------------------+      |
+ *               |                dcb (DDR Config Block)                    |      |
+ * 0x14862000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x14860C00    +----------------------------------------------------------+      |
+ *               |                     FMAP_CACHE                           |      |
+ * 0x14860400    +----------------------------------------------------------+      |
+ *               |                   ddr_information                        |      |
+ * 0x14860000    +----------------------------------------------------------+    BSRAM
+ *               |                    CBFS_MCACHE                           |      |
+ * 0x1485C000    +----------------------------------------------------------+      |
+ *               |                  qclib_serial_log                        |      |
+ * 0x1485B000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x14859000    +----------------------------------------------------------+      |
+ *               |                    DMA_COHERENT                          |      |
+ * 0x14857000    +----------------------------------------------------------+      |
+ *               |                    VBOOT2_WORK                           |      |
+ * 0x14854000    +----------------------------------------------------------+      |
+ *               |                       STACK                              |      |
+ * 0x14850000    +----------------------------------------------------------+      |
+ *               |             TTB (Translation Table Base)                 |      |
+ * 0x14842000    +----------------------------------------------------------+      |
+ *               |                     TIMESTAMP                            |      |
+ * 0x14841C00    +----------------------------------------------------------+      |
+ *               |                 PRERAM_CBFS_CACHE                        |      |
+ * 0x14828000    +----------------------------------------------------------+      |
+ *               |                     BOOTBLOCK                            |      |
+ * 0x14819000    +----------------------------------------------------------+      |
+ *               |                 WATCHDOG_TOMBSTONE                       |      |
+ * 0x14818FFC    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |      |
+ * 0x14815000    +----------------------------------------------------------+      |
+ *               |                   pbl_timestamps                         |      v
+ * 0x14800000    +----------------------------------------------------------+ <---------
+ *               |              ... (Large Address Gap) ...                 |
+ * 0x146AB000    +----------------------------------------------------------+ <---------
+ *               |                     shared_imem                          |      ^
+ * 0x146A8000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |    SSRAM
+ * 0x146A5000    +----------------------------------------------------------+      |
+ *               |                       qcsdi                              |      v
+ * 0x14699000    +----------------------------------------------------------+ <---------
+ *               |         ... (Memory not mapped: Unavailable) ...         | XXXXXXXXX
+ * 0x0B100000    +----------------------------------------------------------+ <---------
+ *               |                    aop_data_ram                          |      ^
+ * 0x0B0E0000    +----------------------------------------------------------+      |
+ *               |                ... Usable memory ...                     |   AOP SRAM
+ * 0x0B080000    +----------------------------------------------------------+      |
+ *               |                    aop_code_ram                          |      v
+ * 0x0B000000    +----------------------------------------------------------+ <---------
+ *
+ */
 
 SECTIONS
 {
-	REGION(shrm, 0x09060000, 64K , 4K)
-
 	AOPSRAM_START(0x0B000000)
-	REGION(aop_code_ram, 0x0B000000, 0x80000, 4096)
-	REGION(aop_data_ram, 0x0B0E0000, 0x20000, 4096)
+	REGION(aop_code_ram, 0x0B000000, 0x80000, 4K)
+	REGION(aop_data_ram, 0x0B0E0000, 0x20000, 4K)
 	AOPSRAM_END(0x0B100000)
 
 	SSRAM_START(0x14680000)
-	OVERLAP_DECOMPRESSOR_VERSTAGE_ROMSTAGE(0x14680000, 132K)
-	REGION(qcsdi, 0x146A1000, 40K, 4K)
+	REGION(qcsdi, 0x14699000, 48K, 4K)
+	REGION(shared_imem, 0x146A8000, 12K, 4K)
 	SSRAM_END(0x146AB000)
 
 	BSRAM_START(0x14800000)
@@ -45,15 +163,48 @@ SECTIONS
 	CBFS_MCACHE(0x1485C000,16K)
 	REGION(ddr_information, 0x14860000, 1K, 1K)
 	FMAP_CACHE(0x14860400, 2K)
-	REGION(dcb, 0x14862000, 32K, 4K)
-	REGION(pmic, 0x1486A000, 96K, 4K)
-	REGION(ddr_training, 0x14882000, 32K, 4K)
-	REGION(qclib, 0x1488A000, 800K, 4K)
-	PRERAM_CBMEM_CONSOLE(0x14954000, 32K)
-	BSRAM_END(0x1495C000)
+	REGION(dcb, 0x14862000, 56K, 4K)
+	REGION(dtb, 0x14870000, 32K, 4K)
+	REGION(ddr_training, 0x14878000, 64K, 4K)
+	REGION(qc_blob_meta, 0x14888000, 16K, 4K)
+	REGION(aop_blob_meta, 0x1488c000, 16K, 4K)
+	REGION(qclib, 0x14897000, 1536K, 4K)
+	REGION(cpr_settings, 0x14A17000, 12K, 4K)
+	PRERAM_CBMEM_CONSOLE(0x14A30000, 32K)
+	OVERLAP_DECOMPRESSOR_VERSTAGE_ROMSTAGE(0x14A38000, 132K)
+	REGION(auth_metadata,0x14A7D000 , 8K, 4K)
+	REGION(debug_policy, 0x14A7F000, 4K, 4K)
+	BSRAM_END(0x14A80000)
+
+	REGION(shrm, 0x24040000, 128K , 4K)
 
 	DRAM_START(0x80000000)
+	REGION(dram_cpucp, 0x80A00000, 0xBA0000, 4K)
+	REGION(dram_ramdump, 0x81A00000, 0x200000, 4K)
+	REGION(dram_aop, 0x81C00000, 0xF780000, 4K)
 	POSTRAM_CBFS_CACHE(0x9F800000, 16M)
 	RAMSTAGE(0xA0800000, 16M)
-	BL31(0xC0000000, 1M)
+	REGION(dram_tz, 0xD8000000, 0xD6000, 4K)
+	REGION(dram_tz_rem, 0xD81D6000, 0x394000, 4K)
+	BL31(0xD856A000, 600K)
+	REGION(dram_smem, 0xFF800000, 0x800000, 4K)
+	DRAM_END(0x100000000)
+
+	/*
+	 * Define the address range limits for fragmented DRAM regions.
+	 *
+	 * These regions, `dram_space_1` and `dram_space_2`, are used to map physical
+	 * memory beyond the initial `_dram` region. The MMU configuration logic in
+	 * `mmu.c` uses `REGION_SIZE()` to dynamically size these ranges based on the
+	 * total system DRAM capacity, which is determined by the QCLib.
+	 *
+	 * Example for a 16GB DRAM system:
+	 * - `_dram` (2GB):          0x80000000 - 0x100000000
+	 * - `_dram_space_1` (14GB): 0x880000000 - 0x440000000 (0x880000000 + 14GB)
+	 *
+	 * Note: The example memory addresses are for illustration and depend on the
+	 * platform's specific memory map.
+	 */
+	REGION(dram_space_1, 0x880000000, 0x780000000, 4K)
+	REGION(dram_space_2, 0x8800000000, 0x7800000000, 4K)
 }

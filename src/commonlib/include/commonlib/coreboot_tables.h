@@ -96,6 +96,7 @@ enum {
 	LB_TAG_OPTION_ENUM		= 0x00ca,
 	LB_TAG_OPTION_DEFAULTS		= 0x00cb,
 	LB_TAG_OPTION_CHECKSUM		= 0x00cc,
+	LB_TAG_BOOT_MODE		= 0x00cd,
 };
 
 /* All table entry base addresses and sizes must be 4-byte aligned. */
@@ -359,7 +360,15 @@ struct lb_spi_flash {
 	uint32_t size;
 	uint32_t flash_size;
 	uint32_t sector_size;
-	uint32_t erase_cmd;
+	/*
+	 * Note: `erase_cmd` was previously a uint32_t. It's now uint8_t because only
+	 * the lowest byte was used, ensuring backward compatibility with older coreboot
+	 * tables and allowing reuse of the remaining bytes.
+	 */
+	uint8_t erase_cmd;
+#define LB_SPI_FLASH_FLAG_IN_4BYTE_ADDR_MODE    (1 << 0)
+	uint8_t flags;
+	uint16_t reserved;
 	/*
 	 * Number of mmap windows used by the platform to decode addresses between SPI flash
 	 * space and host address space. This determines the number of entries in mmap_table.
@@ -611,6 +620,24 @@ struct lb_cfr {
 	uint32_t version;
 	uint32_t checksum;	/* Checksum of the variable payload. */
 	/* struct lb_cfr_option_form		forms[] */
+};
+
+enum boot_mode_t {
+	LB_BOOT_MODE_NORMAL,
+	LB_BOOT_MODE_LOW_BATTERY,
+	LB_BOOT_MODE_OFFMODE_CHARGING,
+};
+
+/*
+ * Boot Mode: Pass the platform boot mode information to payload about
+ * booting in low-battery mode or off-mode charging. This information
+ * is useful for payload to implement charger driver.
+ */
+struct lb_boot_mode {
+	uint32_t tag;
+	uint32_t size;
+
+	enum boot_mode_t boot_mode;
 };
 
 #endif

@@ -2,6 +2,7 @@
 
 #include <boot/coreboot_tables.h>
 #include <bootmode.h>
+#include <cbfs.h>
 #include <cpu/intel/microcode.h>
 #include <fsp/api.h>
 #include <fsp/debug.h>
@@ -10,6 +11,7 @@
 #include <fsp/ppi/mp_service_ppi.h>
 #include <intelblocks/irq.h>
 #include <intelblocks/mp_init.h>
+#include <intelblocks/pmclib.h>
 #include <intelblocks/systemagent.h>
 #include <intelblocks/xdci.h>
 #include <intelpch/lockdown.h>
@@ -210,7 +212,7 @@ static const struct slot_irq_constraints irq_constraints[] = {
 			ANY_PIRQ(PCI_DEVFN_CSE_4),
 		},
 	},
-#if (CONFIG(SOC_INTEL_PANTHERLAKE_U_H) || CONFIG(SOC_INTEL_WILDCATLAKE))
+#if (CONFIG(SOC_INTEL_WILDCATLAKE))
 	{
 		.slot = PCI_DEV_SLOT_UFS,
 		.fns = {
@@ -663,6 +665,50 @@ static void fill_fsps_misc_power_params(FSP_S_CONFIG *s_cfg,
 
 	/* Enable/Disable PCH to CPU energy report feature. */
 	s_cfg->PchPmDisableEnergyReport = !config->pch_pm_energy_report_enable;
+
+	/* Apply PCH PM minimum assertion width settings */
+	if (config->pch_slp_s3_min_assertion_width == SLP_S3_ASSERTION_DEFAULT)
+		s_cfg->PchPmSlpS3MinAssert = SLP_S3_ASSERTION_50_MS;
+	else
+		s_cfg->PchPmSlpS3MinAssert = config->pch_slp_s3_min_assertion_width;
+
+	if (config->pch_slp_s4_min_assertion_width == SLP_S4_ASSERTION_DEFAULT)
+		s_cfg->PchPmSlpS4MinAssert = SLP_S4_ASSERTION_1S;
+	else
+		s_cfg->PchPmSlpS4MinAssert = config->pch_slp_s4_min_assertion_width;
+
+	if (config->pch_slp_sus_min_assertion_width == SLP_SUS_ASSERTION_DEFAULT)
+		s_cfg->PchPmSlpSusMinAssert = SLP_SUS_ASSERTION_4_S;
+	else
+		s_cfg->PchPmSlpSusMinAssert = config->pch_slp_sus_min_assertion_width;
+
+	if (config->pch_slp_a_min_assertion_width == SLP_A_ASSERTION_DEFAULT)
+		s_cfg->PchPmSlpAMinAssert = SLP_A_ASSERTION_2_S;
+	else
+		s_cfg->PchPmSlpAMinAssert = config->pch_slp_a_min_assertion_width;
+
+	/*
+	 * The Reset Power Cycle Duration starts at 20ms and increases by 20ms for each step,
+	 * beginning from 0x0 to 0xFF. Each subsequent increment corresponds to an additional
+	 * 20 milliseconds in duration.
+	 * PCH PM Reset Power Cycle Duration = (PchPmPwrCycDur + 1) * 20ms
+	 */
+	const uint8_t fsp_pm_pwr_cyc_dur_list[] = {
+		0xc7,	/* POWER_CYCLE_DURATION_DEFAULT */
+		0x31,	/* POWER_CYCLE_DURATION_1S */
+		0x63,	/* POWER_CYCLE_DURATION_2S */
+		0x95,	/* POWER_CYCLE_DURATION_3S */
+		0xc7	/* POWER_CYCLE_DURATION_4S */
+	};
+	if (config->pch_reset_power_cycle_duration) {
+		uint8_t pwr_cyc_dur = get_pm_pwr_cyc_dur(s_cfg->PchPmSlpS4MinAssert,
+							   s_cfg->PchPmSlpS3MinAssert,
+							   s_cfg->PchPmSlpAMinAssert,
+							   config->pch_reset_power_cycle_duration);
+		s_cfg->PchPmPwrCycDur =  fsp_pm_pwr_cyc_dur_list[pwr_cyc_dur];
+	} else {
+		s_cfg->PchPmPwrCycDur =  fsp_pm_pwr_cyc_dur_list[POWER_CYCLE_DURATION_DEFAULT];
+	}
 }
 
 static void fill_fsps_npu_params(FSP_S_CONFIG *s_cfg,
@@ -695,7 +741,7 @@ static void fill_fsps_iax_params(FSP_S_CONFIG *s_cfg,
 static void fill_fsps_ufs_params(FSP_S_CONFIG *s_cfg,
 		const struct soc_intel_pantherlake_config *config)
 {
-#if CONFIG(SOC_INTEL_PANTHERLAKE_U_H)
+#if CONFIG(SOC_INTEL_WILDCATLAKE)
 	/* Setting FSP UPD (1,0) to enable controller 0 */
 	s_cfg->UfsEnable[0] = is_devfn_enabled(PCI_DEVFN_UFS);
 	s_cfg->UfsEnable[1] = 0;
@@ -787,6 +833,11 @@ void platform_fsp_silicon_multi_phase_init_cb(uint32_t phase_index)
 			const struct soc_intel_pantherlake_config *config = config_of_soc();
 			tcss_configure(config->typec_aux_bias_pads);
 		}
+
+		/* Allow CBFS preload transfers to complete before FSP-S locks SPI DMA. */
+		struct soc_intel_common_config *config = chip_get_common_soc_structure();
+		if (config->chipset_lockdown == CHIPSET_LOCKDOWN_FSP)
+			cbfs_preload_wait_for_all();
 		break;
 	default:
 		break;
@@ -818,7 +869,7 @@ void soc_load_logo_by_fsp(FSPS_UPD *supd)
 	if (s_cfg->LidStatus == 0)
 		config->panel_orientation = LB_FB_ORIENTATION_NORMAL;
 
-	fsp_convert_bmp_to_gop_blt(&logo, &logo_size,
+	fsp_load_and_convert_bmp_to_gop_blt(&logo, &logo_size,
 				   &supd->FspsConfig.BltBufferAddress,
 				   &blt_size,
 				   &supd->FspsConfig.LogoPixelHeight,

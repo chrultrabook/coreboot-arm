@@ -4,12 +4,45 @@ fw_config
 		option LTE_PRESENT		1
 		option 5G_PRESENT		2
 	end
-	field WIFI_SAR_ID 18 21
-		option WIFI_SAR_TABLE_AX211	0
-		option WIFI_SAR_TABLE_AX203	1
+	field TABLET_MODE 15
+		option TABLET_MODE_DISABLE		0
+		option TABLET_MODE_ENABLE		1
+	end
+	field WIFI_SAR_ID 17 20
+		option WIFI_SAR_TABLE_PUJJOLO_AX211		0
+		option WIFI_SAR_TABLE_PUJJOLO_BE200		1
+		option WIFI_SAR_TABLE_PUJJOQUINCE_AX211		2
+		option WIFI_SAR_TABLE_PUJJOQUINCE_BE200		3
+	end
+	field PDC 21 22
+		option PDC_PUJJOQUINCE        0
+		option PDC_PUJJOLO       1
+	end
+	field FP 24
+		option FP_ABSENT	0
+		option FP_PRESENT	1
+	end
+	field SD_CARD 25
+		option SD_ABSENT	0
+		option SD_PRESENT	1
+	end
+	field WFC 26 27
+		option WFC_ABSENT               0
+		option WFC_MIPI_OVTI8856        1
 	end
 end
 chip soc/intel/alderlake
+
+	# GPE configuration
+	register "pmc_gpe0_dw0" = "GPP_A"
+	register "pmc_gpe0_dw1" = "GPP_H"
+	register "pmc_gpe0_dw2" = "GPP_F"
+
+	# S0ix enable
+	register "s0ix_enable" = "true"
+
+	# Enable CNVi BT
+	register "cnvi_bt_core" = "true"
 
 	# Acoustic settings
 	register "acoustic_noise_mitigation" = "1"
@@ -25,7 +58,10 @@ chip soc/intel/alderlake
 	# This is a bitfield that corresponds to up to 4 TCSS ports.
 	# Bits (0,1) allocated for TCSS Port1 configuration and Bits (2,3)for TCSS Port2.
 	# TcssAuxOri = 0101b
-	# Bit0,Bit2 set to "1" indicates no retimer on USBC Ports
+	# Set Bit0 and Bit2 to "1" to enable the Aux Orientation feature inside the processor.
+        # This only should be set when no retimer is present and processor-level Aux Orientation
+        # is still needed. (E.g. The PDC does not have Aux Orientation feature.)
+        # Bits 0 and 2 must be enabled first before configuring Bits 1 and 3 to be "1".
 	# Bit1,Bit3 set to "0" indicates Aux lines are not swapped on the
 	# motherboard to USBC connector
 	register "tcss_aux_ori" = "0"
@@ -35,6 +71,7 @@ chip soc/intel/alderlake
 
 	register "usb2_ports[0]" = "USB2_PORT_TYPE_C(OC_SKIP)"	# USB2_C0
 	register "usb2_ports[1]" = "USB2_PORT_TYPE_C(OC_SKIP)"	# USB2_C1
+	register "usb2_ports[2]" = "USB2_PORT_MID(OC_SKIP)"	# USB-A0
 	register "usb2_ports[3]" = "USB2_PORT_MID(OC_SKIP)"	# USB-A1
 	register "usb2_ports[4]" = "USB2_PORT_MID(OC_SKIP)"	# WWAN
 	register "usb2_ports[5]" = "USB2_PORT_MID(OC_SKIP)"	# UF Camera
@@ -42,7 +79,10 @@ chip soc/intel/alderlake
 	register "usb2_ports[7]" = "USB2_PORT_MID(OC_SKIP)"	# Bluetooth port for PCIe WLAN
 	register "usb2_ports[9]" = "USB2_PORT_MID(OC_SKIP)"	# Bluetooth port for CNVi WLAN
 
-	#register "usb3_ports[2]" = "USB3_PORT_DEFAULT(OC_SKIP)"	# USB3 port for WWAN
+	register "usb3_ports[0]" = "USB3_PORT_DEFAULT(OC_SKIP)"	# USB3 Type-A port A0(MLB))
+	register "usb3_ports[1]" = "USB3_PORT_DEFAULT(OC_SKIP)"	# USB3 Type-A port A1(DB)
+
+	register "usb3_ports[2]" = "USB3_PORT_DEFAULT(OC_SKIP)"	# USB3 port for WWAN
 
 	# HD Audio
 	register "pch_hda_dsp_enable" = "1"
@@ -53,6 +93,10 @@ chip soc/intel/alderlake
 	register "pch_hda_sdi_enable[0]" = "true"
 	register "pch_hda_sdi_enable[1]" = "true"
 
+	# Configure external V1P05/Vnn/VnnSx Rails for Pujjolo
+	register "ext_fivr_settings" = "{
+		.configure_ext_fivr = 1,
+	}"
 
 	# Intel Common SoC Config
 	#+-------------------+---------------------------+
@@ -62,7 +106,7 @@ chip soc/intel/alderlake
 	#|                   | required to set up a BAR  |
 	#|                   | for TPM communication     |
 	#| I2C1              | Touchscreen               |
-	#| I2C2              | Psensor                   |
+	#| I2C3              | Psensor                   |
 	#| I2C4              | Mipi camera               |
 	#| I2C5              | Trackpad                  |
 	#+-------------------+---------------------------+
@@ -86,11 +130,11 @@ chip soc/intel/alderlake
 				.sda_hold = 7,
 			}
 		},
-		.i2c[2] = {
+		.i2c[3] = {
 			.speed = I2C_SPEED_FAST,
 			.speed_config[0] = {
 				.speed = I2C_SPEED_FAST,
-				.scl_lcnt = 157,
+				.scl_lcnt = 158,
 				.scl_hcnt = 79,
 				.sda_hold = 7,
 			}
@@ -118,8 +162,8 @@ chip soc/intel/alderlake
 	register "serial_io_i2c_mode" = "{
 		[PchSerialIoIndexI2C0] = PchSerialIoPci,
 		[PchSerialIoIndexI2C1] = PchSerialIoPci,
-		[PchSerialIoIndexI2C2] = PchSerialIoPci,
-		[PchSerialIoIndexI2C3] = PchSerialIoDisabled,
+		[PchSerialIoIndexI2C2] = PchSerialIoDisabled,
+		[PchSerialIoIndexI2C3] = PchSerialIoPci,
 		[PchSerialIoIndexI2C4] = PchSerialIoPci,
 		[PchSerialIoIndexI2C5] = PchSerialIoPci,
 	}"
@@ -136,6 +180,55 @@ chip soc/intel/alderlake
 	}"
 
 	device domain 0 on
+		device ref dtt on
+			chip drivers/intel/dptf
+				## sensor information
+				register "options.tsr[0].desc" = ""CPU""
+				register "options.tsr[1].desc" = ""DDR""
+				register "options.tsr[2].desc" = ""5VCharger""
+
+				## Passive Policy
+				register "policies.passive" = "{
+					[0] = DPTF_PASSIVE(CPU,         CPU,           90, 10000),
+					[1] = DPTF_PASSIVE(CPU,         TEMP_SENSOR_0, 80, 60000),
+					[2] = DPTF_PASSIVE(CPU,		TEMP_SENSOR_1, 80, 60000),
+					[3] = DPTF_PASSIVE(CHARGER,	TEMP_SENSOR_2, 75, 15000),
+				}"
+
+				## Critical Policy
+				register "policies.critical" = "{
+					[0] = DPTF_CRITICAL(CPU,               105, SHUTDOWN),
+					[1] = DPTF_CRITICAL(TEMP_SENSOR_0,     100, SHUTDOWN),
+					[2] = DPTF_CRITICAL(TEMP_SENSOR_1,     100, SHUTDOWN),
+					[3] = DPTF_CRITICAL(TEMP_SENSOR_2,     100, SHUTDOWN),
+				}"
+				register "controls.power_limits" = "{
+					.pl1 = {
+							.min_power = 3000,
+							.max_power = 6000,
+							.time_window_min = 1 * MSECS_PER_SEC,
+							.time_window_max = 1 * MSECS_PER_SEC,
+							.granularity = 200,
+						},
+					.pl2 = {
+							.min_power = 25000,
+							.max_power = 25000,
+							.time_window_min = 1 * MSECS_PER_SEC,
+							.time_window_max = 1 * MSECS_PER_SEC,
+							.granularity = 1000,
+						}
+				}"
+
+				## Charger Performance Control (Control, mA)
+				register "controls.charger_perf" = "{
+					[0] = { 255, 3000 },
+					[1] = {  24, 2000 },
+					[2] = {  16, 1500 },
+					[3] = {   8, 1000 }
+				}"
+				device generic 0 alias dptf_policy on end
+			end
+		end
 		device ref ipu on
 			chip drivers/intel/mipi_camera
 				register "acpi_uid" = "0x50000"
@@ -143,7 +236,7 @@ chip soc/intel/alderlake
 				register "device_type" = "INTEL_ACPI_CAMERA_CIO2"
 
 				register "cio2_num_ports" = "1"
-				register "cio2_lanes_used" = "{2}" # 2 CSI Camera lanes are used
+				register "cio2_lanes_used" = "{4}" # 4 CSI Camera lanes are used
 				register "cio2_lane_endpoint[0]" = ""^I2C4.CAM0""
 				register "cio2_prt[0]" = "1"
 				device generic 0 on end
@@ -158,9 +251,26 @@ chip soc/intel/alderlake
 		end #I2C0
 		device ref i2c1 on
 			chip drivers/i2c/hid
+				register "generic.hid" = ""ELAN901C""
+				register "generic.desc" = ""ELAN Touchscreen""
+				register "generic.irq" = "ACPI_IRQ_LEVEL_HIGH(GPP_E11_IRQ)"
+				register "generic.detect" = "1"
+				register "generic.reset_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_C1)"
+				register "generic.reset_delay_ms" = "20"
+				register "generic.reset_off_delay_ms" = "2"
+				register "generic.stop_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_C4)"
+				register "generic.stop_delay_ms" = "280"
+				register "generic.stop_off_delay_ms" = "2"
+				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_C0)"
+				register "generic.enable_delay_ms" = "1"
+				register "generic.has_power_resource" = "1"
+				register "hid_desc_reg_offset" = "0x01"
+				device i2c 10 on end
+			end
+			chip drivers/i2c/hid
 				register "generic.hid" = ""GDIX0000""
 				register "generic.desc" = ""Goodix Touchscreen""
-				register "generic.irq" = "ACPI_IRQ_LEVEL_LOW(GPP_E11_IRQ)"
+				register "generic.irq" = "ACPI_IRQ_LEVEL_HIGH(GPP_E11_IRQ)"
 				register "generic.detect" = "1"
 				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_C0)"
 				register "generic.enable_delay_ms" = "20"
@@ -203,7 +313,7 @@ chip soc/intel/alderlake
 				device generic 0 on end
 			end
 		end
-		device ref i2c2 on
+		device ref i2c3 on
 			chip drivers/i2c/sx9324
 				register "desc" = ""SAR Proximity Sensor""
 				register "irq" = "ACPI_IRQ_LEVEL_LOW(GPP_H19_IRQ)"
@@ -282,13 +392,13 @@ chip soc/intel/alderlake
 				register "has_power_resource" = "1"
 				register "max_dstate_for_probe" = "ACPI_DEVICE_SLEEP_D3_COLD"
 
-				register "ssdb.lanes_used" = "2"
+				register "ssdb.lanes_used" = "4"
 				register "ssdb.link_used" = "1"
 				register "ssdb.vcm_type" = "0x0C"
 				register "vcm_name" = ""VCM0""
 				register "num_freq_entries" = "2"
-				register "link_freq[0]" = "720000000"
-				register "link_freq[1]" = "360000000"
+				register "link_freq[0]" = "360000000"
+				register "link_freq[1]" = "180000000"
 				register "remote_name" = ""IPU0""
 
 				#Controls
@@ -314,7 +424,9 @@ chip soc/intel/alderlake
 				register "off_seq.ops[2]" = "SEQ_OPS_GPIO_DISABLE(1, 0)"
 				register "off_seq.ops[3]" = "SEQ_OPS_GPIO_DISABLE(0, 0)"
 
-				device i2c 10 on end
+				device i2c 10 on
+					probe WFC WFC_MIPI_OVTI8856
+				end
 			end
 			chip drivers/intel/mipi_camera
 				register "acpi_uid" = "3"
@@ -327,20 +439,19 @@ chip soc/intel/alderlake
 				register "max_dstate_for_probe" = "ACPI_DEVICE_SLEEP_D3_COLD"
 
 				# Controls
-				register "gpio_panel.gpio[0].gpio_num" = "GPP_D15"  # EN_PP2800_WCAM_X
-				register "gpio_panel.gpio[1].gpio_num" = "GPP_D16"  # EN_PP1800_PP1200_WCAM_X
+				register "gpio_panel.gpio[0].gpio_num" = "GPP_D16"  # EN_PP2800_WCAM_X and EN_PP1800_PP1200_WCAM_X
 
 				# _ON
-				register "on_seq.ops_cnt" = "2"
+				register "on_seq.ops_cnt" = "1"
 				register "on_seq.ops[0]" = "SEQ_OPS_GPIO_ENABLE(0, 5)"
-				register "on_seq.ops[1]" = "SEQ_OPS_GPIO_ENABLE(1, 5)"
 
 				# _OFF
-				register "off_seq.ops_cnt" = "2"
+				register "off_seq.ops_cnt" = "1"
 				register "off_seq.ops[0]" = "SEQ_OPS_GPIO_DISABLE(1, 0)"
-				register "off_seq.ops[1]" = "SEQ_OPS_GPIO_DISABLE(0, 0)"
 
-				device i2c 0C on end
+				device i2c 0C on
+					probe WFC WFC_MIPI_OVTI8856
+				end
 			end
 			chip drivers/intel/mipi_camera
 				register "acpi_hid" = "ACPI_DT_NAMESPACE_HID"
@@ -368,7 +479,9 @@ chip soc/intel/alderlake
 				register "nvm_width" = "0x10"
 				register "nvm_compat" = ""atmel,24c08""
 
-				device i2c 50 on end
+				device i2c 50 on
+					probe WFC WFC_MIPI_OVTI8856
+				end
 			end
 		end
 		device ref i2c5 on
@@ -381,9 +494,9 @@ chip soc/intel/alderlake
 				device i2c 15 on end
 			end
 			chip drivers/i2c/hid
-				register "generic.hid" = ""SYNA0000""
+				register "generic.hid" = ""GXTP5100""
 				register "generic.cid" = ""ACPI0C50""
-				register "generic.desc" = ""Synaptics Touchpad""
+				register "generic.desc" = ""Goodix Touchpad""
 				register "generic.irq" = "ACPI_IRQ_WAKE_LEVEL_LOW(GPP_F14_IRQ)"
 				register "generic.wake" = "GPE0_DW2_14"
 				register "generic.detect" = "1"
@@ -403,8 +516,18 @@ chip soc/intel/alderlake
 		end
 		device ref ish on
 			chip drivers/intel/ish
+				register "firmware_name" = ""pujjolo_ish.bin""
 				register "add_acpi_dma_property" = "true"
-				device generic 0 on end
+				device generic 1 on
+					probe TABLET_MODE TABLET_MODE_ENABLE
+				end
+			end
+			chip drivers/intel/ish
+				register "firmware_name" = ""lite_ish.bin""
+				register "add_acpi_dma_property" = "true"
+				device generic 0 on
+					probe TABLET_MODE TABLET_MODE_DISABLE
+				end
 			end
 		end
 		device ref ufs on end
@@ -413,8 +536,6 @@ chip soc/intel/alderlake
 				register "device_count" = "4"
 				# DDIA for eDP
 				register "device[0].name" = ""LCD0""
-				# Internal panel on the first port of the graphics chip
-				register "device[0].type" = "panel"
 				# DDIB for HDMI
 				# If HDMI is not enumerated in the kernel, then no GFX device should be added for DDIB
 				register "device[1].name" = ""DD01""
@@ -441,6 +562,12 @@ chip soc/intel/alderlake
 				register "add_acpi_dma_property" = "true"
 				device pci 00.0 on end
 			end
+			chip soc/intel/common/block/pcie/rtd3
+				register "enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_E10)"
+				register "reset_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_H20)"
+				register "srcclk_pin" = "2"
+				device generic 0 on end
+			end
 		end
 		device ref pcie_rp7 on
 			# Enable SD Card PCIE 7 using clk 3
@@ -455,6 +582,7 @@ chip soc/intel/alderlake
 				register "srcclk_pin" = "3"
 				device generic 0 on end
 			end
+			probe SD_CARD SD_PRESENT
 		end	#PCIE7 SD card
 		device ref pch_espi on
 			chip ec/google/chromeec
@@ -515,7 +643,13 @@ chip soc/intel/alderlake
 						register "use_custom_pld" = "true"
 						register "custom_pld" = "ACPI_PLD_TYPE_C(RIGHT, LEFT, ACPI_PLD_GROUP(2, 1))"
 						device ref usb2_port2 on end
-
+					end
+					chip drivers/usb/acpi
+						register "desc" = ""USB2 Type-A Port A0 (DB)""
+						register "type" = "UPC_TYPE_A"
+						register "use_custom_pld" = "true"
+						register "custom_pld" = "ACPI_PLD_TYPE_A(RIGHT, LEFT, ACPI_PLD_GROUP(3, 1))"
+						device ref usb2_port3 on end
 					end
 					chip drivers/usb/acpi
 						register "desc" = ""USB2 Type-A Port A1 (DB)""
@@ -554,11 +688,28 @@ chip soc/intel/alderlake
 						device ref usb2_port10 on end
 					end
 					chip drivers/usb/acpi
+						register "desc" = ""USB3 Type-A Port A0 (MLB)""
+						register "type" = "UPC_TYPE_USB3_A"
+						register "use_custom_pld" = "true"
+						register "custom_pld" = "ACPI_PLD_TYPE_A(RIGHT, LEFT, ACPI_PLD_GROUP(3, 1))"
+						device ref usb3_port1 on end
+					end
+					chip drivers/usb/acpi
 						register "desc" = ""USB3 Type-A Port A1 (DB)""
 						register "type" = "UPC_TYPE_USB3_A"
 						register "use_custom_pld" = "true"
-						register "custom_pld" = "ACPI_PLD_TYPE_A(RIGHT, LEFT, ACPI_PLD_GROUP(4, 1))"
+						register "custom_pld" = "ACPI_PLD_TYPE_A(LEFT, RIGHT, ACPI_PLD_GROUP(4, 1))"
 						device ref usb3_port2 on end
+					end
+					chip drivers/usb/acpi
+						register "desc" = ""USB3 WWAN""
+						register "type" = "UPC_TYPE_INTERNAL"
+						device ref usb3_port3 on end
+					end
+					chip drivers/usb/acpi
+						register "desc" = ""USB3 WLAN""
+						register "type" = "UPC_TYPE_INTERNAL"
+						device ref usb3_port4 on end
 					end
 				end
 			end
@@ -583,8 +734,18 @@ chip soc/intel/alderlake
 				register "reset_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_E7)"
 				register "enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_D2)"
 				register "enable_delay_ms" = "3"
-				device spi 0 on end
+				device spi 0 on
+					probe FP FP_PRESENT
+				end
 			end # FPMCU
+		end
+		device ref cnvi_wifi on
+			chip drivers/wifi/generic
+				register "wake" = "GPE0_PME_B0"
+				register "enable_cnvi_ddr_rfim" = "true"
+				register "add_acpi_dma_property" = "true"
+				device generic 0 on end
+			end
 		end
 	end
 end

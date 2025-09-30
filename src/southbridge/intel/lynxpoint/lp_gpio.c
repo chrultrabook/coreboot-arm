@@ -5,6 +5,7 @@
 #include <device/pci_ops.h>
 #include <device/device.h>
 #include <device/pci.h>
+#include <gpio.h>
 
 #include "pch.h"
 #include "lp_gpio.h"
@@ -99,7 +100,7 @@ void setup_pch_lp_gpios(const struct pch_lp_gpio_map map[])
 	outl(pirq2apic, gpio_base + GPIO_PIRQ_APIC_EN);
 }
 
-int get_gpio(int gpio_num)
+int gpio_get(gpio_t gpio_num)
 {
 	u16 gpio_base = get_gpio_base();
 
@@ -109,26 +110,7 @@ int get_gpio(int gpio_num)
 	return !!(inl(gpio_base + GPIO_CONFIG0(gpio_num)) & GPI_LEVEL);
 }
 
-/*
- * get a number comprised of multiple GPIO values. gpio_num_array points to
- * the array of gpio pin numbers to scan, terminated by -1.
- */
-unsigned int get_gpios(const int *gpio_num_array)
-{
-	int gpio;
-	unsigned int bitmask = 1;
-	unsigned int vector = 0;
-
-	while (bitmask &&
-	       ((gpio = *gpio_num_array++) != -1)) {
-		if (get_gpio(gpio))
-			vector |= bitmask;
-		bitmask <<= 1;
-	}
-	return vector;
-}
-
-void set_gpio(int gpio_num, int value)
+void gpio_set(gpio_t gpio_num, int value)
 {
 	u16 gpio_base = get_gpio_base();
 	u32 conf0;
@@ -147,4 +129,9 @@ int gpio_is_native(int gpio_num)
 	u16 gpio_base = get_gpio_base();
 
 	return !(inl(gpio_base + GPIO_CONFIG0(gpio_num)) & 1);
+}
+
+void gpio_input(gpio_t gpio)
+{
+	// FIXME: Implement
 }

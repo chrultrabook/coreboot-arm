@@ -2,7 +2,6 @@
 
 config SOC_INTEL_GRANITERAPIDS
 	bool
-	select MICROCODE_BLOB_NOT_HOOKED_UP
 	select FSP_NVS_DATA_POST_SILICON_INIT
 	select SOC_INTEL_MEM_MAPPED_PM_CONFIGURATION
 	select XEON_SP_COMMON_BASE
@@ -15,8 +14,22 @@ config SOC_INTEL_GRANITERAPIDS
 	select PLATFORM_USES_FSP2_X86_32
 	select HAVE_IOAT_DOMAINS
 	select FSP_SPEC_VIOLATION_XEON_SP_HEAP_WORKAROUND
+	select DRAM_SUPPORT_DDR5
+	select HAVE_INTEL_FSP_REPO
 	help
 	  Intel Granite Rapids support
+
+config SOC_INTEL_GRANITERAPIDS_AP
+	bool
+	select SOC_INTEL_GRANITERAPIDS
+	help
+	  Intel Granite Rapids AP support
+
+config SOC_INTEL_GRANITERAPIDS_SP
+	bool
+	select SOC_INTEL_GRANITERAPIDS
+	help
+	  Intel Granite Rapids SP support
 
 if SOC_INTEL_GRANITERAPIDS
 
@@ -24,9 +37,17 @@ config CHIPSET_DEVICETREE
 	string
 	default "soc/intel/xeon_sp/gnr/chipset.cb"
 
+if FSP_USE_REPO
+
 config FSP_HEADER_PATH
-	string "Location of FSP headers"
-	default "src/vendorcode/intel/fsp/fsp2_0/graniterapids/ap"
+	default "3rdparty/fsp/BirchStreamFspBinPkg/ap/Include" if SOC_INTEL_GRANITERAPIDS_AP
+	default "3rdparty/fsp/BirchStreamFspBinPkg/sp/Include" if SOC_INTEL_GRANITERAPIDS_SP
+
+config FSP_FD_PATH
+	default "3rdparty/fsp/BirchStreamFspBinPkg/ap/Fsp.fd" if SOC_INTEL_GRANITERAPIDS_AP
+	default "3rdparty/fsp/BirchStreamFspBinPkg/sp/Fsp.fd" if SOC_INTEL_GRANITERAPIDS_SP
+
+endif
 
 config MAX_CPUS
 	int

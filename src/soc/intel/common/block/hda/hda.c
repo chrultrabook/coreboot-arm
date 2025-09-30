@@ -24,6 +24,7 @@ struct device_operations hda_ops = {
 	.set_resources		= pci_dev_set_resources,
 	.enable_resources	= pci_dev_enable_resources,
 	.init			= hda_init,
+	.final			= pci_dev_request_bus_master,
 	.ops_pci		= &pci_dev_ops_pci,
 	.scan_bus		= scan_static_bus
 };
@@ -70,6 +71,7 @@ static const unsigned short pci_device_ids[] = {
 	PCI_DID_INTEL_MTL_AUDIO_7,
 	PCI_DID_INTEL_MTL_AUDIO_8,
 	PCI_DID_INTEL_ARL_AUDIO,
+	PCI_DID_INTEL_ARP_S_AUDIO,
 	PCI_DID_INTEL_RPP_P_AUDIO,
 	PCI_DID_INTEL_RPP_S_AUDIO_1,
 	PCI_DID_INTEL_RPP_S_AUDIO_2,

@@ -19,6 +19,16 @@ fw_config
 		option ISH_DISABLE		0
 		option ISH_ENABLE		1
 	end
+	field SERIES 9 9
+		option SERIES_ULDRENITE		0
+		option SERIES_ULDRINO		1
+	end
+	field STORAGE 30 31
+		option STORAGE_EMMC		0
+		option STORAGE_NVME		1
+		option STORAGE_UFS		2
+		option STORAGE_UNKNOWN		3
+	end
 end
 
 chip soc/intel/alderlake
@@ -351,7 +361,20 @@ chip soc/intel/alderlake
 				register "generic.detect" = "1"
 				register "generic.wake" = "GPE0_DW1_03"
 				register "hid_desc_reg_offset" = "0x20"
-				device i2c 2c on end
+				device i2c 2c on
+					probe SERIES SERIES_ULDRENITE
+				end
+			end
+			chip drivers/i2c/hid
+				register "generic.hid" = ""GDIX0000""
+				register "generic.desc" = ""Goodix Touchpad""
+				register "generic.irq" = "ACPI_IRQ_WAKE_LEVEL_LOW(GPP_B3_IRQ)"
+				register "generic.detect" = "1"
+				register "generic.wake" = "GPE0_DW1_03"
+				register "hid_desc_reg_offset" = "0x20"
+				device i2c 2c on
+					probe SERIES SERIES_ULDRINO
+				end
 			end
 		end # I2C1
 		device ref i2c5 on
@@ -367,7 +390,7 @@ chip soc/intel/alderlake
 				register "stop_delay_ms" = "150"
 				register "stop_off_delay_ms" = "2"
 				register "enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_E17)"
-				register "enable_delay_ms" = "1"
+				register "enable_delay_ms" = "6"
 				register "has_power_resource" = "true"
 				device i2c 10 on
 					probe TOUCHSCREEN TOUCHSCREEN_UNKNOWN
@@ -418,7 +441,7 @@ chip soc/intel/alderlake
 				register "generic.stop_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_A21)"
 				register "generic.stop_delay_ms" = "130"
 				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_E17)"
-				register "generic.enable_delay_ms" = "1"
+				register "generic.enable_delay_ms" = "10"
 				register "generic.has_power_resource" = "1"
 				register "hid_desc_reg_offset" = "0x20"
 				device i2c 2c on
@@ -435,7 +458,7 @@ chip soc/intel/alderlake
 				register "generic.stop_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_A21)"
 				register "generic.stop_delay_ms" = "130"
 				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_E17)"
-				register "generic.enable_delay_ms" = "1"
+				register "generic.enable_delay_ms" = "10"
 				register "generic.has_power_resource" = "1"
 				register "hid_desc_reg_offset" = "0x20"
 				device i2c 3c on
@@ -500,7 +523,14 @@ chip soc/intel/alderlake
 		device ref shared_sram on end
 		device ref heci1 on end
 		device ref pmc hidden end
-		device ref emmc on end
+		device ref emmc on
+			probe STORAGE STORAGE_EMMC
+			probe STORAGE STORAGE_UNKNOWN
+		end
+		device ref ufs on
+			probe STORAGE STORAGE_UFS
+			probe STORAGE STORAGE_UNKNOWN
+		end
 		device ref uart0 on end
 		device ref pch_espi on
 			chip ec/google/chromeec

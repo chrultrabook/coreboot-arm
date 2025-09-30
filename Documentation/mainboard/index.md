@@ -43,6 +43,7 @@ IMB-1222 <asrock/imb-1222.md>
 
 A88XM-E <asus/a88xm-e.md>
 F2A85-M <asus/f2a85-m.md>
+H610i-PLUS D4 <asus/h610i-plus-d4>
 P2B-LS <asus/p2b-ls.md>
 P3B-F <asus/p3b-f.md>
 P5Q <asus/p5q.md>
@@ -140,6 +141,7 @@ GA-H61M-S2PV <gigabyte/ga-h61m-s2pv.md>
 Compaq 8200 Elite SFF <hp/compaq_8200_sff.md>
 Compaq 8300 Elite SFF <hp/compaq_8300_sff.md>
 Compaq Elite 8300 USDT <hp/compaq_8300_usdt.md>
+Compaq Pro 6300 Series Microtower/SFF <hp/compaq_pro_6300_series.md>
 Pro 3x00 Series <hp/pro_3x00_series.md>
 Z220 Workstation SFF <hp/z220_sff.md>
 ```
@@ -241,6 +243,13 @@ Internal flashing <lenovo/ivb_internal_flashing.md>
 T440p <lenovo/t440p.md>
 ```
 
+### Skylake/Kabylake series
+
+```{toctree}
+:maxdepth: 1
+
+T480/T480s <lenovo/t480.md>
+```
 ## Libretrend
 
 ```{toctree}

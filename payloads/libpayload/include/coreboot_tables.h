@@ -90,6 +90,7 @@ enum {
 	CB_TAG_OPTION_ENUM		= 0x00ca,
 	CB_TAG_OPTION_DEFAULTS		= 0x00cb,
 	CB_TAG_OPTION_CHECKSUM		= 0x00cc,
+	CB_TAG_BOOT_MODE		= 0x00cd,
 };
 
 typedef __aligned(4) uint64_t cb_uint64_t;
@@ -306,7 +307,15 @@ struct cb_spi_flash {
 	uint32_t size;
 	uint32_t flash_size;
 	uint32_t sector_size;
-	uint32_t erase_cmd;
+	/*
+	 * Note: `erase_cmd` was previously a uint32_t. It's now uint8_t because only
+	 * the lowest byte was used, ensuring backward compatibility with older coreboot
+	 * tables and allowing reuse of the remaining bytes.
+	 */
+	uint8_t erase_cmd;
+#define CB_SPI_FLASH_FLAG_IN_4BYTE_ADDR_MODE    (1 << 0)
+	uint8_t flags;
+	uint16_t reserved;
 	/*
 	 * Number of mmap windows used by the platform to decode addresses between SPI flash
 	 * space and host address space. This determines the number of entries in mmap_table.
@@ -435,6 +444,23 @@ struct cb_acpi_rsdp {
 	cb_uint64_t rsdp_pointer; /* Address of the ACPI RSDP */
 };
 
+enum boot_mode_t {
+	CB_BOOT_MODE_NORMAL,
+	CB_BOOT_MODE_LOW_BATTERY,
+	CB_BOOT_MODE_OFFMODE_CHARGING,
+};
+
+/*
+ * Boot Mode: Pass the platform boot mode information to payload about
+ * booting in low-battery mode or off-mode charging. These information
+ * is useful for payload to implement charger driver.
+ */
+struct cb_boot_mode {
+	uint32_t tag;
+	uint32_t size;
+
+	enum boot_mode_t boot_mode;
+};
 
 /* Helpful inlines */
 

@@ -22,24 +22,27 @@ static const struct pad_config i2s_enable_pads[] = {
 	PAD_CFG_NF(GPP_D12, NONE, DEEP, NF2),
 	/* I2S0_RXD_HDR */
 	PAD_CFG_NF(GPP_D13, NONE, DEEP, NF2),
-	/* I2S1_SCLK_HDR */
-	PAD_CFG_NF(GPP_S00, NONE, DEEP, NF6),
-	/* I2S1_SFRM_HDR */
-	PAD_CFG_NF(GPP_S01, NONE, DEEP, NF6),
 	/* I2S1_TXD_HDR */
-	PAD_CFG_NF(GPP_S02, NONE, DEEP, NF6),
+	PAD_CFG_NF(GPP_S00, NONE, DEEP, NF6),
 	/* I2S1_RXD_HDR */
+	PAD_CFG_NF(GPP_S01, NONE, DEEP, NF6),
+	/* I2S1_SCLK_HDR */
+	PAD_CFG_NF(GPP_S02, NONE, DEEP, NF6),
+	/* I2S1_SFRM_HDR */
 	PAD_CFG_NF(GPP_S03, NONE, DEEP, NF6),
+	/* I2S2_SCLK_HDR */
+	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF6),
+	/* I2S2_SFRM_HDR */
+	PAD_CFG_NF(GPP_S05, NONE, DEEP, NF6),
+	/* I2S2_TXD_HDR */
+	PAD_CFG_NF(GPP_S06, NONE, DEEP, NF6),
+	/* I2S2_RXD_HDR */
+	PAD_CFG_NF(GPP_S07, NONE, DEEP, NF6),
 
 	/* DMIC_CLK */
 	PAD_CFG_NF(GPP_D16, NONE, DEEP, NF3),
 	/* DMIC_DATA */
 	PAD_CFG_NF(GPP_D17, NONE, DEEP, NF3),
-
-	/* DMIC_CLK */
-	PAD_CFG_NF(GPP_S04, NONE, DEEP, NF5),
-	/* DMIC_DATA */
-	PAD_CFG_NF(GPP_S05, NONE, DEEP, NF5),
 };
 
 static const struct pad_config hda_enable_pads[] = {
@@ -242,11 +245,6 @@ static const struct pad_config gen4_ssd_pads[] = {
 	PAD_CFG_GPO(GPP_B10, 1, PLTRST),
 	/* GPP_B09:     M2_GEN4_SSD_RESET_N */
 	PAD_CFG_GPO(GPP_B09, 1, PLTRST),
-};
-
-static const struct pad_config ufs_enable_pads[] = {
-	/* GPP_D21:     GPP_D21_UFS_REFCLK */
-	PAD_CFG_NF(GPP_D21, NONE, DEEP, NF1),
 };
 
 /* Gen5 NVME: at the bottom M.2 slot */
@@ -485,6 +483,18 @@ static const struct pad_config thc1_enable_wake[] = {
 };
 
 static const struct pad_config ish_disable_pads[] = {
+	/* GPP_B04:     NC */
+	PAD_NC(GPP_B04, NONE),
+	/* GPP_B05:     NC */
+	PAD_NC(GPP_B05, NONE),
+	/* GPP_B07:     NC */
+	PAD_NC(GPP_B07, NONE),
+	/* GPP_B08:     NC */
+	PAD_NC(GPP_B08, NONE),
+	/* GPP_B22:     NC */
+	PAD_NC(GPP_B22, NONE),
+	/* GPP_B23:     NC */
+	PAD_NC(GPP_B23, NONE),
 	/* GPP_D06:     NC */
 	PAD_NC(GPP_D06, NONE),
 	/* GPP_E05:     NC */
@@ -494,6 +504,18 @@ static const struct pad_config ish_disable_pads[] = {
 };
 
 static const struct pad_config ish_enable_pads[] = {
+	/* GPP_B04:     ISH_GP_0_SNSR_HDR */
+	PAD_CFG_NF(GPP_B04, NONE, DEEP, NF4),
+	/* GPP_B05:     ISH_GP_1_SNSR_HDR */
+	PAD_CFG_NF(GPP_B05, NONE, DEEP, NF4),
+	/* GPP_B07:     ISH_GP_3_SNSR_HDR */
+	PAD_CFG_NF(GPP_B07, NONE, DEEP, NF4),
+	/* GPP_B08:     ISH_GP_4_SNSR_HDR */
+	PAD_CFG_NF(GPP_B08, NONE, DEEP, NF4),
+	/* GPP_B22:     ISH_GP_5_SNSR_HDR */
+	PAD_CFG_NF(GPP_B22, NONE, DEEP, NF4),
+	/* GPP_B23:     ISH_GP_6_SNSR_HDR */
+	PAD_CFG_NF(GPP_B23, NONE, DEEP, NF4),
 	/* GPP_D06:     ISH_UART0_TXD */
 	PAD_CFG_NF(GPP_D06, NONE, DEEP, NF2),
 	/* GPP_E05:     ISH_GP_7_SNSR_HDR */
@@ -507,12 +529,6 @@ static const struct pad_config fp_disable_pads[] = {
 	/* GPP_D01:     MOD_TCSS1_TYP_A_VBUS_EN */
 	PAD_CFG_GPO(GPP_D01, 1, DEEP),
 	PAD_NC(GPP_E17, NONE),
-	/* FIXME: b/390031369
-	 * use dedicated GPIO PIN for codec enable
-	 * when FPS is enabled.
-	 */
-	/* GPP_E19:     CODEC_EN */
-	PAD_CFG_GPO(GPP_E19, 1, PLTRST),
 	PAD_NC(GPP_E20, NONE),
 	PAD_NC(GPP_F14, NONE),
 	PAD_NC(GPP_F15, NONE),
@@ -526,8 +542,6 @@ static const struct pad_config fp_enable_pads[] = {
 	PAD_CFG_GPI_IRQ_WAKE(GPP_D01, NONE, PWROK, LEVEL, INVERT),
 	/* GPP_E17:     GSPI0A_CS0 */
 	PAD_CFG_NF(GPP_E17, NONE, DEEP, NF5),
-	/* GPP_E19:     FPMCU_PWREN */
-	PAD_CFG_GPO(GPP_E19, 1, DEEP),
 	/* GPP_E20:     FPMCU_FW_UPDATE */
 	PAD_CFG_GPO_LOCK(GPP_E20, 0, LOCK_CONFIG),
 	/* GPP_F14:     GPSI0A_MOSI */
@@ -594,11 +608,10 @@ void fw_config_gpio_padbased_override(struct pad_config *padbased_table)
 	} else if (fw_config_probe(FW_CONFIG(STORAGE, STORAGE_NVME_GEN5))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, gen5_ssd_pads);
 	} else if (fw_config_probe(FW_CONFIG(STORAGE, STORAGE_UFS))) {
-		GPIO_PADBASED_OVERRIDE(padbased_table, ufs_enable_pads);
+		die("UFS is not supported on Panther Lake\n");
 	} else if (fw_config_probe(FW_CONFIG(STORAGE, STORAGE_UNKNOWN))) {
 		GPIO_PADBASED_OVERRIDE(padbased_table, gen4_ssd_pads);
 		GPIO_PADBASED_OVERRIDE(padbased_table, gen5_ssd_pads);
-		GPIO_PADBASED_OVERRIDE(padbased_table, ufs_enable_pads);
 	}
 
 	if (fw_config_probe(FW_CONFIG(AUDIO, AUDIO_NONE))) {

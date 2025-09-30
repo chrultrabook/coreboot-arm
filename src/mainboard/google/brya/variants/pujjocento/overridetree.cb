@@ -60,7 +60,10 @@ chip soc/intel/alderlake
 	# This is a bitfield that corresponds to up to 4 TCSS ports.
 	# Bits (0,1) allocated for TCSS Port1 configuration and Bits (2,3)for TCSS Port2.
 	# TcssAuxOri = 0101b
-	# Bit0,Bit2 set to "1" indicates no retimer on USBC Ports
+	# Set Bit0 and Bit2 to "1" to enable the Aux Orientation feature inside the processor.
+        # This only should be set when no retimer is present and processor-level Aux Orientation
+        # is still needed. (E.g. The PDC does not have Aux Orientation feature.)
+        # Bits 0 and 2 must be enabled first before configuring Bits 1 and 3 to be "1".
 	# Bit1,Bit3 set to "0" indicates Aux lines are not swapped on the
 	# motherboard to USBC connector
 	register "tcss_aux_ori" = "0"
@@ -154,6 +157,18 @@ chip soc/intel/alderlake
 				.sda_hold = 35,
 			}
 		},
+	}"
+
+	# Power limit config
+	register "power_limits_config[ADL_N_041_6W_CORE]" = "{
+		.tdp_pl1_override = 13,
+		.tdp_pl2_override = 25,
+		.tdp_pl4 = 78,
+	}"
+	register "power_limits_config[ADL_N_081_15W_CORE]" = "{
+		.tdp_pl1_override = 22,
+		.tdp_pl2_override = 35,
+		.tdp_pl4 = 83,
 	}"
 
 	device domain 0 on
@@ -294,8 +309,8 @@ chip soc/intel/alderlake
 				## Charger Performance Control (Control, mA)
 				register "controls.charger_perf" = "{
 					[0] = { 255, 4700 },
-					[1] = {  40, 2500 },
-					[2] = {  16, 1000 },
+					[1] = {  48, 3000 },
+					[2] = {  24, 1500 },
 					[3] = {   8,  500 }
 				}"
 
@@ -525,7 +540,7 @@ chip soc/intel/alderlake
 				device i2c 10 on end
 			end
 			chip drivers/i2c/hid
-				register "generic.hid" = ""PARA3406""
+				register "generic.hid" = ""PARA340X""
 				register "generic.desc" = ""Parade Touchscreen""
 				register "generic.irq" = "ACPI_IRQ_LEVEL_LOW(GPP_E11_IRQ)"
 				register "generic.detect" = "1"
@@ -533,24 +548,6 @@ chip soc/intel/alderlake
 				register "generic.reset_delay_ms" = "20"
 				register "generic.reset_off_delay_ms" = "2"
 				register "generic.stop_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_C4)"
-				register "generic.stop_delay_ms" = "280"
-				register "generic.stop_off_delay_ms" = "2"
-				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_C0)"
-				register "generic.enable_delay_ms" = "1"
-				register "generic.has_power_resource" = "1"
-				register "hid_desc_reg_offset" = "0x01"
-				device i2c 24 on end
-			end
-			chip drivers/i2c/hid
-				register "generic.hid" = ""PARA3408""
-				register "generic.desc" = ""Parade Touchscreen""
-				register "generic.irq" = "ACPI_IRQ_LEVEL_LOW(GPP_E11_IRQ)"
-				register "generic.detect" = "1"
-				register "generic.reset_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_C1)"
-				register "generic.reset_delay_ms" = "20"
-				register "generic.reset_off_delay_ms" = "2"
-				register "generic.stop_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_LOW(GPP_C4)"
-				register "generic.stop_delay_ms" = "280"
 				register "generic.stop_off_delay_ms" = "2"
 				register "generic.enable_gpio" = "ACPI_GPIO_OUTPUT_ACTIVE_HIGH(GPP_C0)"
 				register "generic.enable_delay_ms" = "1"

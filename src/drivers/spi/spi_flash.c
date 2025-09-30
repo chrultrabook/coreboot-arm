@@ -18,7 +18,7 @@
 #define ADDR_MOD 0
 #endif
 
-#define SPI_FLASH_EXIT_4BYTE_STAGE	\
+#define SPI_FIRST_STAGE	\
 	(ENV_INITIAL_STAGE || CONFIG(BOOT_DEVICE_MEMORY_MAPPED))
 
 static void spi_flash_addr(u32 addr, u8 *cmd)
@@ -564,7 +564,12 @@ int spi_flash_probe(unsigned int bus, unsigned int cs, struct spi_flash *flash)
 			CONFIG_ROM_SIZE);
 	}
 
-	if (CONFIG(SPI_FLASH_EXIT_4_BYTE_ADDR_MODE) && SPI_FLASH_EXIT_4BYTE_STAGE) {
+	if (CONFIG(SPI_FLASH_FORCE_4_BYTE_ADDR_MODE) && SPI_FIRST_STAGE) {
+		printk(BIOS_DEBUG, "SF: Entering 4-byte addressing mode\n");
+		spi_flash_cmd(&flash->spi, CMD_ENTER_4BYTE_ADDR_MODE, NULL, 0);
+	}
+
+	if (CONFIG(SPI_FLASH_EXIT_4_BYTE_ADDR_MODE) && SPI_FIRST_STAGE) {
 		printk(BIOS_DEBUG, "SF: Exiting 4-byte addressing mode\n");
 		spi_flash_cmd(&flash->spi, CMD_EXIT_4BYTE_ADDR_MODE, NULL, 0);
 	}
@@ -738,6 +743,7 @@ void lb_spi_flash(struct lb_header *header)
 		return;
 
 	flash = (struct lb_spi_flash *)lb_new_record(header);
+	memset(flash, 0, sizeof(*flash));
 
 	flash->tag = LB_TAG_SPI_FLASH;
 	flash->size = sizeof(*flash);
@@ -756,13 +762,15 @@ void lb_spi_flash(struct lb_header *header)
 		flash->erase_cmd = CMD_BLOCK_ERASE;
 	}
 
-	if (!CONFIG(BOOT_DEVICE_MEMORY_MAPPED)) {
-		flash->mmap_count = 0;
-	} else {
+	if (CONFIG(BOOT_DEVICE_MEMORY_MAPPED)) {
 		struct flash_mmap_window *table = (struct flash_mmap_window *)(flash + 1);
 		flash->mmap_count = spi_flash_get_mmap_windows(table);
 		flash->size += flash->mmap_count * sizeof(*table);
 	}
+
+	/* Pass 4-byte address mode information to payload */
+	if (CONFIG(SPI_FLASH_FORCE_4_BYTE_ADDR_MODE))
+		flash->flags |= LB_SPI_FLASH_FLAG_IN_4BYTE_ADDR_MODE;
 }
 
 int spi_flash_ctrlr_protect_region(const struct spi_flash *flash,

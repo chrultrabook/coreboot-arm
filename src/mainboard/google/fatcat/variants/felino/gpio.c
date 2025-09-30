@@ -40,8 +40,8 @@ static const struct pad_config gpio_table[] = {
 	PAD_CFG_GPI_SCI_LOW(GPP_A12, NONE, DEEP, LEVEL),
 	/* GPP_A13:     Not used */
 	PAD_NC(GPP_A13, NONE),
-	/* GPP_A15:     HW_ID1 */
-	PAD_CFG_GPI(GPP_A15, NONE, PLTRST),
+	/* GPP_A15:     Not used */
+	PAD_NC(GPP_A15, NONE),
 	/* GPP_A16:     BT_RF_KILL_N */
 	PAD_CFG_GPO(GPP_A16, 1, DEEP),
 	/* GPP_A17:     PCH_WLAN_OFF_N */
@@ -93,8 +93,8 @@ static const struct pad_config gpio_table[] = {
 	PAD_CFG_GPO(GPP_B21, 0, DEEP),
 	/* GPP_B22:     Not used */
 	PAD_NC(GPP_B22, NONE),
-	/* GPP_B23:     HW_ID0 */
-	PAD_CFG_GPI(GPP_B23, NONE, PLTRST),
+	/* GPP_B23:     Not used */
+	PAD_NC(GPP_B23, NONE),
 	/* GPP_B24:     ESPI_ALERT0_N */
 	PAD_CFG_NF_IOSSTATE(GPP_B24, UP_20K, DEEP, NF1, IGNORE),
 	/* GPP_B25:     Not used */
@@ -164,8 +164,8 @@ static const struct pad_config gpio_table[] = {
 	PAD_NC(GPP_D05, NONE),
 	/* GPP_D06:     Not used */
 	PAD_NC(GPP_D06, NONE),
-	/* GPP_D07:     Not used */
-	PAD_NC(GPP_D07, NONE),
+	/* GPP_D07:     CAM_VDD_EN_SOC */
+	PAD_CFG_GPO(GPP_D07, 1, PLTRST),
 	/* GPP_D08:     NC */
 	PAD_NC(GPP_D08, NONE),
 	/* GPP_D09:     Not used */
@@ -266,8 +266,8 @@ static const struct pad_config gpio_table[] = {
 	PAD_NC(GPP_F07, NONE),
 	/* GPP_F08:     NC */
 	PAD_NC(GPP_F08, NONE),
-	/* GPP_F09:     SX_EXIT_HOLDOFF# */
-	PAD_CFG_NF(GPP_F09, NONE, DEEP, NF2),
+	/* GPP_F09:     NC */
+	PAD_NC_LOCK(GPP_F09, NONE, LOCK_CONFIG),
 	/* GPP_F10:     HW_ID7 */
 	PAD_CFG_GPI(GPP_F10, NONE, PLTRST),
 	/* GPP_F11:     TC_RETIMER_FORCE_PWR */
@@ -380,7 +380,7 @@ static const struct pad_config gpio_table[] = {
 	/* GPP_V11:     SLP_LAN_N */
 	PAD_CFG_NF(GPP_V11, NONE, DEEP, NF1),
 	/* GPP_V12:     WAKE# */
-	PAD_CFG_NF(GPP_V12, NONE, DEEP, NF1),
+	PAD_CFG_NF(GPP_V12, UP_1K, DEEP, NF1),
 	/* GPP_V13:     GPP_V13_CATERR_N */
 	PAD_CFG_NF(GPP_V13, NONE, DEEP, NF1),
 	/* GPP_V14:     GPP_V14_FORCEPR_N */

@@ -31,10 +31,13 @@ static const struct sm_object me_state_counter = SM_DECLARE_NUMBER({
 	.default_value	= 0,
 });
 
-/* Power state after power loss */
+/*
+ * Power state after power loss
+ * Use this option or the one below, but not both
+ */
 static const struct sm_object power_on_after_fail = SM_DECLARE_ENUM({
 	.opt_name	= "power_on_after_fail",
-	.ui_name	= "Restore AC Power Loss",
+	.ui_name	= "Restore AC power after loss",
 	.ui_helptext	= "Specify what to do when power is re-applied after a power loss.",
 	.default_value	= CONFIG_MAINBOARD_POWER_FAILURE_STATE,
 	.values		= (const struct sm_enum_value[]) {
@@ -44,10 +47,21 @@ static const struct sm_object power_on_after_fail = SM_DECLARE_ENUM({
 				SM_ENUM_VALUE_END					},
 });
 
-/* PCIe RP ASPM */
+/*
+ * Automatic power-on toggle
+ * Use this option or the one above, but not both
+ */
+static const struct sm_object power_on_after_fail_bool = SM_DECLARE_BOOL({
+	.opt_name	= "power_on_after_fail",
+	.ui_name	= "Power on after failure",
+	.ui_helptext	= "Automatically turn on after a power failure",
+	.default_value	= CONFIG_MAINBOARD_POWER_FAILURE_STATE,
+});
+
+/* PCIe PCH RP ASPM */
 static const struct sm_object pciexp_aspm = SM_DECLARE_ENUM({
 	.opt_name	= "pciexp_aspm",
-	.ui_name	= "PCIe RP ASPM",
+	.ui_name	= "PCIe PCH RP ASPM",
 	.ui_helptext	= "Controls the Active State Power Management for PCIe devices."
 			  " Enabling this feature can reduce power consumption of"
 			  " PCIe-connected devices during idle times.",
@@ -58,6 +72,22 @@ static const struct sm_object pciexp_aspm = SM_DECLARE_ENUM({
 				{ "L1",		ASPM_L1		},
 				{ "L0sL1",	ASPM_L0S_L1	},
 				{ "Auto",	ASPM_AUTO	},
+				SM_ENUM_VALUE_END		},
+});
+
+/* PCIe CPU RP ASPM */
+static const struct sm_object pciexp_aspm_cpu = SM_DECLARE_ENUM({
+	.opt_name	= "pciexp_aspm_cpu",
+	.ui_name	= "PCIe CPU RP ASPM",
+	.ui_helptext	= "Controls the Active State Power Management for PCIe devices."
+			  " Enabling this feature can reduce power consumption of"
+			  " PCIe-connected devices during idle times.",
+	.default_value	= ASPM_L0S_L1,
+	.values		= (const struct sm_enum_value[]) {
+				{ "Disabled",	ASPM_DISABLE	},
+				{ "L0s",	ASPM_L0S	},
+				{ "L1",		ASPM_L1		},
+				{ "L0sL1",	ASPM_L0S_L1	},
 				SM_ENUM_VALUE_END		},
 });
 

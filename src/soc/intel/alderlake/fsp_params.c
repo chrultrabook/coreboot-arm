@@ -716,6 +716,31 @@ static void fill_fsps_xhci_params(FSP_S_CONFIG *s_cfg,
 			s_cfg->Usb3HsioTxDownscaleAmp[i] =
 				config->usb3_ports[i].tx_downscale_amp;
 		}
+		if (config->usb3_ports[i].tx_rate2_uniq_tran) {
+			s_cfg->Usb3HsioTxRate2UniqTranEnable[i] = 1;
+			s_cfg->Usb3HsioTxRate2UniqTran[i] =
+				config->usb3_ports[i].tx_rate2_uniq_tran;
+		}
+		if (config->usb3_ports[i].ctrl_adapt_offset_cfg_enable) {
+			s_cfg->PchUsb3HsioCtrlAdaptOffsetCfgEnable[i] = 1;
+			s_cfg->PchUsb3HsioCtrlAdaptOffsetCfg[i] =
+				config->usb3_ports[i].ctrl_adapt_offset_cfg;
+		}
+		if (config->usb3_ports[i].olfps_cfg_pull_up_dwn_res) {
+			s_cfg->PchUsb3HsioOlfpsCfgPullUpDwnResEnable[i] = 1;
+			s_cfg->PchUsb3HsioOlfpsCfgPullUpDwnRes[i] =
+				config->usb3_ports[i].olfps_cfg_pull_up_dwn_res;
+		}
+		if (config->usb3_ports[i].filter_sel_n) {
+			s_cfg->PchUsb3HsioFilterSelNEnable[i] = 1;
+			s_cfg->PchUsb3HsioFilterSelN[i] =
+				config->usb3_ports[i].filter_sel_n;
+		}
+		if (config->usb3_ports[i].filter_sel_p) {
+			s_cfg->PchUsb3HsioFilterSelPEnable[i] = 1;
+			s_cfg->PchUsb3HsioFilterSelP[i] =
+				config->usb3_ports[i].filter_sel_p;
+		}
 	}
 
 	for (i = 0; i < ARRAY_SIZE(config->tcss_ports); i++) {
@@ -753,6 +778,7 @@ static void fill_fsps_sata_params(FSP_S_CONFIG *s_cfg,
 	if (s_cfg->SataEnable) {
 		s_cfg->SataMode = config->sata_mode;
 		s_cfg->SataSalpSupport = config->sata_salp_support;
+		s_cfg->SataSpeedLimit = config->sata_speed;
 		memcpy(s_cfg->SataPortsEnable, config->sata_ports_enable,
 			sizeof(s_cfg->SataPortsEnable));
 		memcpy(s_cfg->SataPortsDevSlp, config->sata_ports_dev_slp,
@@ -927,7 +953,7 @@ static void fill_fsps_pcie_params(FSP_S_CONFIG *s_cfg,
 		s_cfg->PcieRpClkReqDetect[i] = !!(rp_cfg->flags & PCIE_RP_CLK_REQ_DETECT);
 		/* PcieRpSlotImplemented default to 1 (slot implemented) in FSP; 0: built-in */
 		if (!!(rp_cfg->flags & PCIE_RP_BUILT_IN))
-			s_cfg->PcieRpSlotImplemented[i] = 0;
+			s_cfg->PcieRpSlotImplemented[i] = false;
 		s_cfg->PcieRpDetectTimeoutMs[i] = rp_cfg->pcie_rp_detect_timeout_ms;
 		configure_pch_rp_power_management(s_cfg, rp_cfg, i);
 	}
@@ -1397,7 +1423,7 @@ void soc_load_logo_by_fsp(FSPS_UPD *supd)
 	if (s_cfg->LidStatus == 0)
 		config->panel_orientation = LB_FB_ORIENTATION_NORMAL;
 
-	fsp_convert_bmp_to_gop_blt(&supd->FspsConfig.LogoPtr,
+	fsp_load_and_convert_bmp_to_gop_blt(&supd->FspsConfig.LogoPtr,
 			 &supd->FspsConfig.LogoSize,
 			 &supd->FspsConfig.BltBufferAddress,
 			 &supd->FspsConfig.BltBufferSize,

@@ -7,3 +7,12 @@ config BOARD_GOOGLE_BLUEY
 
 config BOARD_GOOGLE_QUENBI
 	bool "->  Quenbi"
+
+config BOARD_GOOGLE_BLUEYH
+	bool "->  BlueyH"
+
+config BOARD_GOOGLE_QUENBIH
+	bool "->  QuenbiH"
+
+config BOARD_GOOGLE_QUARTZ
+	bool "->  Quartz"

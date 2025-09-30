@@ -602,6 +602,10 @@ config AZALIA_HDA_CODEC_SUPPORT
 	  mainboard directory to the build which contain the board-specific HD
 	  audio codec configuration.
 
+config AZALIA_USE_LEGACY_VERB_TABLE
+	bool
+	default n
+
 config PCIEXP_PLUGIN_SUPPORT
 	bool
 	default y
@@ -1015,7 +1019,7 @@ config ALWAYS_ALLOW_ABOVE_4G_ALLOCATION
 	  Required for modern graphics cards that support resizable BAR, such as
 	  Intel Arc or AMD RX series.
 	  Please keep in mind that not all payloads support it
-	  (i.e: LinuxBoot and EDK2 do, GRUB doesn't).
+	  (i.e: LinuxBoot and EDK2 do, SeaBIOS and GRUB don't).
 
 config XHCI_UTILS
 	def_bool n

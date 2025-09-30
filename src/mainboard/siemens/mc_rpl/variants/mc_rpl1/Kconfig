@@ -1,0 +1,18 @@
+## SPDX-License-Identifier: GPL-2.0-only
+
+if BOARD_SIEMENS_MC_RPL1
+
+config BOARD_SPECIFIC_OPTIONS
+	def_bool y
+	select INTEL_LPSS_UART_FOR_CONSOLE
+	select MAINBOARD_HAS_TPM2
+	select MEMORY_MAPPED_TPM
+	select TPM_MEASURED_BOOT
+	select TPM_MEASURED_BOOT_INIT_BOOTBLOCK
+	select DRIVER_INTEL_I210
+
+config UART_FOR_CONSOLE
+	int
+	default 2
+
+endif # BOARD_SIEMENS_MC_RPL1

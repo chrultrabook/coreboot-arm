@@ -60,3 +60,21 @@ config FAST_SPI_GENERATE_SSDT
 	  If this switch is selected, an entry in the SSDT will be generated
 	  for the controller to report the occupied resource which is not
 	  discoverable at OS runtime.
+
+config FAST_SPI_DMA
+	bool
+	help
+	  Choose this option to allow the use of the SPI DMA controller, if
+	  it's available. When enabled, the boot read-only region device
+	  functions are enhanced with a DMA version of the readat()
+	  callback. Although DMA transfers may not be significantly faster,
+	  they can free up CPU resources for other meaningful tasks in a
+	  multitasking environment (see COOP_MULTITASKING).
+
+config FAST_SPI_DMA_QUEUE_SIZE
+	int
+	depends on FAST_SPI_DMA
+	default 4
+	help
+	  Defines the maximum number of concurrent DMA transfers that can
+	  be queued and processed.

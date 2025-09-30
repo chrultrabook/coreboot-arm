@@ -26,6 +26,7 @@ struct panel_description {
 	uint32_t quirks;
 };
 
+void mtk_display_disable_secure_mode(void);
 int mtk_display_init(uintptr_t fb_base, unsigned long fb_size);
 struct panel_description *get_active_panel(void);
 
